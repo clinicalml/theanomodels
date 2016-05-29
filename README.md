@@ -6,7 +6,7 @@ python2.7
 
 [Theano](https://github.com/Theano/Theano)
 
-## What does this do?
+## Overview
 This wrapper takes care of some basic bookkeeping 
 for any model and leaves the rest up to the user. In this case, 
 this package defines a base model that can be inherited from. The
