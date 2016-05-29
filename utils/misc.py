@@ -1,0 +1,98 @@
+import os,h5py,sys,glob
+import numpy as np
+import cPickle as pickle
+
+def readPickle(fname, nobjects =1):
+    obj = []
+    with open(fname,'rb') as f:
+        for n in range(nobjects):
+            obj.append(pickle.load(f))
+    return obj
+
+def removeIfExists(fname):
+    if os.path.exists(fname):
+        os.remove(fname)
+
+def createIfAbsent(DIR):
+    if not os.path.exists(DIR):
+        os.system('mkdir -p '+DIR)
+
+def mapPrint(title, hmap, nlFreq=1):
+    print title,'   {'
+    ctr = 0
+    for k in hmap:
+        print k,':',hmap[k], 
+        ctr+=1
+        if ctr%nlFreq==0:
+            print '\n',
+    print '\n}'
+
+def saveHDF5(fname, savedata):
+    ff = h5py.File(fname,mode='w')
+    for k in savedata:
+        ff.create_dataset(k, data=savedata[k])
+    ff.close()
+
+def displayTime(event, start, end, reportingIn='seconds'):
+    time_taken = end-start
+    if reportingIn=='minutes':
+        time_taken= time_taken/60.
+    if reportingIn=='hours':
+        time_taken= time_taken/3600.
+    print '\t\t<',event,'> took ',time_taken,' ',reportingIn
+
+def getPYDIR():
+    for k in sys.path:
+        if 'mlmodels' in os.path.basename(k):
+            return k.split('mlmodels')[0]+'mlmodels'
+    assert False,'Should not reach here, directory <mlmodels> expected in PYTHONPATH.'
+
+def loadHDF5(fname):
+    assert os.path.exists(fname),'File not found'
+    fhandle = h5py.File(fname,mode='r')
+    results = {}
+    for k in fhandle.keys():
+        results[k] = fhandle[k].value
+    fhandle.close()
+    return results
+
+def getLowestError(mat):
+    """ 
+    Get the lowest error in Kx2 matrix. Col 0: Epochs, Col 1: Val. Error
+    """
+    idxMin  = np.argmin(mat[:,1])
+    epochMin= mat[int(idxMin),0]
+    valMin  = mat[int(idxMin),1]
+    return epochMin, valMin, idxMin
+
+def setNumpyFloatPrint():
+    """
+    Set numpy's print so you can see numbers while debugging
+    """
+    np.set_printoptions(formatter={'float':lambda x: '%.4f'%(x)})
+
+def getBestStatistics(fstring):
+    """
+    Get the stats file with the best validation error
+    -Get the last number
+    """
+    maxEpoch = 0
+    for f in glob.glob(fstring+'*-stats.h5'):
+        if 'EP' in f:
+            epoch = int(f.split('-EP')[1].split('-')[0])
+            if epoch > maxEpoch and epoch>0:
+                maxEpoch = epoch
+                maxF     = f
+    if maxEpoch==0:
+        return {}
+    data = loadHDF5(maxF)
+    epochMin, valMin, idxMin = getLowestError(data['valid_bound'])
+    results = {}
+    results['maxEpoch'] = maxEpoch
+    results['maxF']     = maxF
+    results['epochMin'] = epochMin
+    results['valMin']   = valMin
+    results['idxMin']   = idxMin
+    results['minF']   =   maxF.replace(str(int(maxEpoch)),str(int(epochMin)))
+    print maxEpoch, maxF, epochMin, valMin, idxMin, results['minF'],'\n'
+    return results
