@@ -12,7 +12,7 @@ for any model and leaves the rest up to the user. In this case,
 this package defines a base model that can be inherited from. The
 base model provides functionality to (1) save weights
 intermittently (2) load from checkpoints (3) use common initialization schemes 
-for matrices used in deep learning. The rest of the code is up to the user to specify in theano.
+for matrices used in deep learning. The rest is up to the user to specify in theano.
 
 ## Defining a Model
 
