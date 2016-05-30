@@ -13,8 +13,8 @@ parser.add_argument('-lr','--lr', action='store',default = 0.0001, help='Learnin
 parser.add_argument('-dset','--dataset', action='store',default = '', help='Dataset', type=str)
 parser.add_argument('-rd','--rnn_dropout', action='store',default = 0.5, help='Dropout after each RNN output layer', type=float)
 parser.add_argument('-rl','--rnn_layers', action='store',default = 1, help='Number of RNN layers', type=int, choices = [1,2])
-parser.add_argument('-rs','--rnn_size', action='store', default = 800, help='Hidden dimensions in RNN', type=int)
-parser.add_argument('-nl','--nonlinearity', action='store',default = 'relu', help='Nonlinarity',type=str, choices=['relu','tanh','softplus','maxout'])
+parser.add_argument('-rs','--rnn_size', action='store', default = 400, help='Hidden dimensions in RNN', type=int)
+parser.add_argument('-nl','--nonlinearity', action='store',default = 'tanh', help='Nonlinarity',type=str, choices=['relu','tanh','softplus','maxout'])
 
 parser.add_argument('-ischeme','--init_scheme', action='store',default = 'uniform', help='Type of initialization for weights', type=str, choices=['uniform','normal','xavier','he'])
 parser.add_argument('-mstride','--maxout_stride', action='store',default = 4, help='Stride for maxout',type=int)
@@ -29,7 +29,6 @@ parser.add_argument('-fg','--forget_bias', action='store',default = 10., help='B
 parser.add_argument('-reg','--reg_type', action='store',default = 'l2', help='Type of regularization',type=str,choices=['l1','l2'])
 parser.add_argument('-rv','--reg_value', action='store',default = 0.05, help='Amount of regularization',type=float)
 parser.add_argument('-rspec','--reg_spec', action='store',default = '_', help='String to match parameters',type=str)
-
 #Save/Load
 parser.add_argument('-uid','--unique_id', action='store',default = 'uid',help='Unique Identifier',type=str)
 parser.add_argument('-seed','--seed', action='store',default = 1, help='Random Seed',type=int)
