@@ -33,11 +33,11 @@ Defining a model involves a few steps:
 
 A few examples are provided in models/static.py (Variational Autoencoder) and models/temporal.py (LSTM)
 
-## Optimization Strategies
+## Optimization
 
 When building the model, use self.setupOptimizer and specify one of rmsprop/adam during model initialization.
-The opimization modules are defined in utils/optimizer.py. They use the names of the parameters to determine
-whether or not to add regularization
+The opimization modules are defined in utils/optimizer.py. They use parameter names to determine
+regularization and define updates to parameters with variable learning rates. 
 
 **IMPORTANT**: The T.grad function is called on the model parameters which are defined as variable in self.tWeights whose name
 contains a string in ['W_','b_','U_','_W','_b','_U']. The code prints out the variables that the cost is
