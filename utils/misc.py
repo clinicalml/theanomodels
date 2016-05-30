@@ -43,9 +43,9 @@ def displayTime(event, start, end, reportingIn='seconds'):
 
 def getPYDIR():
     for k in sys.path:
-        if 'mlmodels' in os.path.basename(k):
-            return k.split('mlmodels')[0]+'mlmodels'
-    assert False,'Should not reach here, directory <mlmodels> expected in PYTHONPATH.'
+        if 'theanomodels' in os.path.basename(k):
+            return k.split('theanomodels')[0]+'theanomodels'
+    assert False,'Should not reach here, directory <theanomodels> expected in PYTHONPATH.'
 
 def loadHDF5(fname):
     assert os.path.exists(fname),'File not found'
