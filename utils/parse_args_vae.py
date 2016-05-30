@@ -40,7 +40,7 @@ parser.add_argument('-infm','--inference_model', action='store',default = 'singl
 #Regularization
 parser.add_argument('-reg','--reg_type', action='store',default = 'l2', help='Type of regularization',type=str,choices=['l1','l2'])
 parser.add_argument('-rv','--reg_value', action='store',default = 0.01, help='Amount of regularization',type=float)
-parser.add_argument('-rspec','--reg_spec', action='store',default = 'p_', help='String to match parameters (Default is generative model)',type=str)
+parser.add_argument('-rspec','--reg_spec', action='store',default = '_', help='String to match parameters (Default is generative model)',type=str)
 params = vars(parser.parse_args())
 
 hmap       = OrderedDict() 

@@ -109,7 +109,7 @@ class VAE(BaseModel, object):
         logcov  = self._LinearNL(self.tWeights['q_logcov_W'],self.tWeights['q_logcov_b'],inp,onlyLinear=True)
         return mu, logcov
     
-    def _evaluateKL(self, mu, logcov, eps, mix_probs = None):
+    def _evaluateKL(self, mu, logcov, eps):
         """
                             KL divergence between N(0,I) and N(mu,exp(logcov))
         """
@@ -131,7 +131,6 @@ class VAE(BaseModel, object):
         X   = T.matrix('X',   dtype=config.floatX)
         eps = T.matrix('eps', dtype=config.floatX)
         X.tag.test_value, eps.tag.test_value   = self._fakeData()
-        mix_probs      = None
         #Learning Rates and annealing objective function
         #Add them to npWeights/tWeights to be tracked [do not have a prefix _W or _b so wont be diff.]
         self._addWeights('lr', np.asarray(self.params['lr'],dtype=config.floatX),borrow=False)
@@ -149,13 +148,13 @@ class VAE(BaseModel, object):
         
         #Build training graph
         mu_t, logcov_t     = self._buildInference(X,self.params['input_dropout'])
-        z_t,  KL_t         = self._evaluateKL(mu_t, logcov_t, eps, mix_probs)
+        z_t,  KL_t         = self._evaluateKL(mu_t, logcov_t, eps)
         _, negCLL_t = self._buildEmission(z_t, X, add_noise = True)
         
         meanAbsDev = 0
         #Build evaluation graph
         mu_e, logcov_e     = self._buildInference(X,0.)
-        z_e,  KL_e         = self._evaluateKL(mu_e, logcov_e, eps, mix_probs)
+        z_e,  KL_e         = self._evaluateKL(mu_e, logcov_e, eps)
         params_e, negCLL_e = self._buildEmission(z_e, X, add_noise = False)
         
         #Cost function to minimize
@@ -176,8 +175,6 @@ class VAE(BaseModel, object):
         
         #Build theano functions
         fxn_inputs = [X,eps]
-        if mix_probs is not None:
-            fxn_inputs.append(mix_probs)
         
         #Importance sampled estimate
         ll_prior             = self._llGaussian(z_e, T.zeros_like(z_e,dtype=config.floatX),
@@ -203,7 +200,7 @@ class VAE(BaseModel, object):
         z = np.random.randn(nsamples,self.params['dim_stochastic']).astype(config.floatX)
         return self.reconstruct(z)
     
-    def infer(self, data, mix_probs = None):
+    def infer(self, data):
         """
                                 Posterior Inference using recognition network
         """
@@ -213,7 +210,7 @@ class VAE(BaseModel, object):
         eps  = np.random.randn(data.shape[0],self.params['dim_stochastic']).astype(config.floatX)
         return self.inference(X=data.astype(config.floatX),eps=eps)
 
-    def evaluateBound(self, dataset, batch_size, S=10, mix_probs=None):
+    def evaluateBound(self, dataset, batch_size, S=10):
         """
                                     Evaluate bound S times on dataset 
         """
@@ -239,7 +236,7 @@ class VAE(BaseModel, object):
         a = np.max(mat, axis=1, keepdims=True)
         return a + np.log(np.mean(np.exp(mat-a.repeat(mat.shape[1],1)),axis=1,keepdims=True))
     
-    def impSamplingNLL(self, dataset, batch_size, S = 200, mix_probs = None):
+    def impSamplingNLL(self, dataset, batch_size, S = 200):
         """
                                     Importance sampling based log likelihood
         """
@@ -261,25 +258,8 @@ class VAE(BaseModel, object):
         ll /= float(N)
         return -ll
     
-    def updateMixture(self, mix_probs, n_K):
-        #Given the original set of K components, return the projection of the probs. on the n_K dim. simplex 
-        if n_K<0 or n_K>=len(mix_probs.ravel()):
-            return mix_probs
-        elif n_K>0:
-            L = len(mix_probs.ravel())
-            assert L==self.params['n_components'],'Size: '+str(L)+' Expecting: '+str(self.params['n_components'])
-            #Take n_K components, project onto simplex and leave the other probabilities 0 so they aren't sampled
-            #Then return
-            proj = np.copy(mix_probs).ravel()[:n_K]
-            proj/= proj.sum()
-            tmp  = np.zeros(mix_probs.ravel().shape)
-            tmp[:n_K] = proj
-            return tmp
-        else:
-            assert False,'Shouldnt happen'
     def learn(self, dataset, epoch_start=0, epoch_end=1000, batch_size=200, shuffle=False, 
-              savefile = None, savefreq = None, dataset_eval=None, mix_probs=None, replicate_K = None, 
-              pretrain = None):
+              savefile = None, savefreq = None, dataset_eval=None, replicate_K = None):
         assert len(dataset.shape)==2,'Expecting 2D dataset matrix'
         assert dataset.shape[1]==self.params['dim_observations'],'dim observations incorrect'
         N = dataset.shape[0]
@@ -287,15 +267,6 @@ class VAE(BaseModel, object):
         if shuffle:
             np.random.shuffle(idxlist)
         trainbound,validbound,validll,current_lr = [],[],[],self.params['lr']
-        if pretrain is not None:
-            addcomponent_freq = pretrain
-            nK                = 1 
-            mprobs            = self.updateMixture(mix_probs_original, nK)
-        else:
-            #Condition should never be satisfied
-            addcomponent_freq = epoch_end+10000
-            nK                = self.params['n_components']
-            mprobs            = mix_probs
         #Training epochs
         for epoch in range(epoch_start, epoch_end+1):
             start_time = time.time()
@@ -337,9 +308,9 @@ class VAE(BaseModel, object):
                 self._p(('Saving at epoch %d'%epoch))
                 self._saveModel(fname=savefile+'-EP'+str(epoch))
                 if dataset_eval is not None:
-                    v_bound = self.evaluateBound(dataset_eval, batch_size=batch_size, mix_probs= mix_probs)
+                    v_bound = self.evaluateBound(dataset_eval, batch_size=batch_size)
                     validbound.append((epoch,v_bound))
-                    v_ll = self.impSamplingNLL(dataset_eval, batch_size=batch_size, mix_probs= mix_probs)
+                    v_ll = self.impSamplingNLL(dataset_eval, batch_size=batch_size)
                     validll.append((epoch,v_ll))
                     self._p(('Ep (%d): Valid Bound: %.4f, Valid LL: %.4f')%(epoch, v_bound, v_ll))
                 intermediate = {}

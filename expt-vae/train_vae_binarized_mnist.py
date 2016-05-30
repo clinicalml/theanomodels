@@ -51,24 +51,14 @@ savedata = vae.learn(           trainData,
                                 savefreq   = params['savefreq'],
                                 savefile   = savef,
                                 dataset_eval= validData,
-                                replicate_K= replicate_K,
-                                pretrain   = params['pretrain']
+                                replicate_K= replicate_K
                                 )
 displayTime('Running VAE',start_time, time.time())
 savedata['test_bound'] = vae.evaluateBound(dataset['test'], batch_size = params['batch_size'])
 
 #Save file log file
 saveHDF5(savef+'-final.h5',savedata)
-
-np.random.seed(1)
-#nviz    = 1000
-#idx_viz = np.random.permutation(dataset['valid'].shape[0])[:nviz]
-#savedata['viz_idx'] = idx_viz
-#savedata['viz_z']   = tsne(savedata['post_z'][idx_viz,:])
-
-#Overwrite log file
-saveHDF5(savef+'-final.h5',savedata)
-print 'TEST BOUND: ',savedata['test_bound']
+print 'Test Bound: ',savedata['test_bound']
 
 import ipdb;
 ipdb.set_trace()
