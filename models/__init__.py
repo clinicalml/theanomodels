@@ -148,7 +148,7 @@ class BaseModel:
             plist = ['_U','U_','W_','_W','_b','b_']
             if not np.any([k in name for k in plist]):
                 self._p('WARNING: '+name+' will not differentiated with respect to')
-            self.npWeights[name] = data
+            self.npWeights[name] = data.astype(config.floatX)
             self.tWeights[name]  = theano.shared(self.npWeights[name], name=name,**kwargs)
     
     def _getModelParams(self):

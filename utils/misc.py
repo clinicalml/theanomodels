@@ -96,3 +96,15 @@ def getBestStatistics(fstring):
     results['minF']   =   maxF.replace(str(int(maxEpoch)),str(int(epochMin)))
     print maxEpoch, maxF, epochMin, valMin, idxMin, results['minF'],'\n'
     return results
+
+def trainValidTestIdx(N, train_frac = 0.80, test_frac  = 0.5):
+    np.random.seed(1)
+    idxlist = np.random.permutation(N)
+    Ntrain  = int(train_frac*N)
+    train_idx, test_valid_idx = idxlist[:Ntrain], idxlist[Ntrain:]
+    Ntestvalid= len(test_valid_idx)
+    Ntest     = int(test_frac*Ntestvalid)
+    valid_idx = test_valid_idx[:Ntest]
+    test_idx  = test_valid_idx[Ntest:]
+    assert len(train_idx)+len(valid_idx)+len(test_idx)==N,'Index lengths dont match'
+    return train_idx, valid_idx, test_idx
