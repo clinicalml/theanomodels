@@ -151,7 +151,7 @@ class BaseModel:
             self.npWeights[name] = data.astype(config.floatX)
             self.tWeights[name]  = theano.shared(self.npWeights[name], name=name,**kwargs)
     
-    def _getModelParams(self):
+    def _getModelParams(self, restrict = ''):
         """
         Return list of model parameters to take derivatives with respect to
         """
@@ -159,9 +159,12 @@ class BaseModel:
         namelist  = []
         for k in self.tWeights.values():
             if 'W_' in k.name or 'b_' in k.name or '_b' in k.name or '_W' in k.name or 'U_' in k.name or '_U' in k.name:
-                paramlist.append(k)
-                namelist.append(k.name)
-        self._p('Taking gradients with respect to: ['+','.join(namelist)+']')
+                #Use this to only get a list of parameters with specific substrings like 'p_'
+                #Since it is set to '' by default, it should appear in all strings
+                if restrict in k.name:
+                    paramlist.append(k)
+                    namelist.append(k.name)
+        self._p('Modifying : ['+','.join(namelist)+']')
         return paramlist
     
     def _makeTheanoShared(self, dictIn):
