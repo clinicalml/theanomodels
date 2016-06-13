@@ -108,3 +108,6 @@ def trainValidTestIdx(N, train_frac = 0.80, test_frac  = 0.5):
     test_idx  = test_valid_idx[Ntest:]
     assert len(train_idx)+len(valid_idx)+len(test_idx)==N,'Index lengths dont match'
     return train_idx, valid_idx, test_idx
+
+def getConfigFile(fname):
+    return fname.replace('final.h5','').split('EP')[0]+'config.pkl'
