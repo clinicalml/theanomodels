@@ -40,7 +40,7 @@ def regularize(cost, params, reg_val, reg_type, reg_spec):
     cost: cost to regularize
     params: list of parameters
     reg_val: multiplier for regularizer
-    reg_type: type of regularizer 'l1','l2'
+    reg_type: accepted types of regularizer 'l1','l2'
     pnorm_str: simple regex to exclude parameters not satisfying regex
     """
     l1 = lambda p: T.sum(abs(p))
