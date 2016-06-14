@@ -63,12 +63,20 @@ class BaseModel:
         self._buildModel()
         self._p(('_buildModel took : %.4f seconds')%(time.time()-start_time))
         assert self.tOptWeights is not None, 'Need to have optimization weights specified when building model'
-    def _p(self,stringToPrint):
+    def _p(self,stringToPrint,logThis=False):
         """
         _p: print formatted string
         """
-        print '\t<<',stringToPrint,'>>'
-        
+        toPrint = '\t<<',stringToPrint,'>>'
+        print toPrint
+        if logThis and hasattr(self,'logf'):
+            self.logf.write(toPrint+'\n')
+
+    def _openLogFile():
+        assert 'logfile' in self.params,'Requires location of logfile'
+        self.logf = open(self.params['logfile'],'a')
+    def _closeLogFile():
+        self.logf.close()
     """
     Saving and loading Model
     """
@@ -456,3 +464,4 @@ class BaseModel:
         mat_max = T.max(mat, axis=axis, keepdims=True)
         lse = T.log(T.sum(T.exp(mat - mat_max), axis=axis, keepdims=True)) + mat_max
         return lse
+
