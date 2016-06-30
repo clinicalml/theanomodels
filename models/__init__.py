@@ -5,8 +5,7 @@ import six.moves.cPickle as pickle
 from collections import OrderedDict
 import sys, time, os
 import numpy as np
-import gzip, warnings
-import theano
+import gzip, warnings, theano
 from theano import config
 theano.config.compute_test_value = 'warn'
 from theano.printing import pydotprint
@@ -362,12 +361,12 @@ class BaseModel:
         gamma_name = W_name+'_BN_gamma'
         beta_name  = W_name+'_BN_beta'
         self._addWeights(gamma_name, gamma_init, borrow=True)
-        self._addWeights(beta_name,  beta_init, borrow=True)
+        self._addWeights(beta_name,  beta_init,  borrow=True)
         #Create a running mean that will not be differentiated 
         mean_name  = W_name.replace('W','').replace('__','_')+'_BN_running_mean'
         var_name   = W_name.replace('W','').replace('__','_')+'_BN_running_var'
-        mean_init  = np.zeros((W_shape[1],),dtype=config.floatX)
-        var_init   = np.ones((W_shape[1],),dtype=config.floatX)
+        mean_init  = np.zeros((W_shape[1],), dtype=config.floatX)
+        var_init   = np.ones((W_shape[1],),  dtype=config.floatX)
         self._addWeights(mean_name, mean_init, borrow=True)
         self._addWeights(var_name,  var_init, borrow=True)
         momentum,eps= 0.9, 1e-6
@@ -377,14 +376,17 @@ class BaseModel:
             assert False,'Not implemented'
         else:
             if validation:
-                pass
+                normalized = (lin-self.tWeights[mean_name])/T.sqrt(self.tWeights[var_name]+eps)
+                bn_lin     = self.tWeights[gamma_name]*normalized + self.tWeights[beta_name]
             else:
                 cur_mean   = lin.mean(0) 
                 cur_var    = lin.var(0) 
                 normalized = (lin-cur_mean) / T.sqrt(cur_var+eps) 
                 bn_lin     = self.tWeights[gamma_name]*normalized + self.tWeights[beta_name]
-                self.train_updates.append((self.tWeights[mean_name], momentum * self.tWeights[mean_name] + (1.0-momentum) * cur_mean))
-                self.train_updates.append((self.tWeights[var_name], momentum * self.tWeights[mean_name] + (1.0-momentum) * (float(W_shape[0])/float(W_shape[0]-1))* cur_var))
+                self.updates.append((self.tWeights[mean_name], momentum * self.tWeights[mean_name] + (1.0-momentum) * cur_mean))
+                self.updates.append((self.tWeights[var_name], momentum * self.tWeights[var_name] + (1.0-momentum) * (float(W_shape[0])/float(W_shape[0]-1))* cur_var))
+                #Add to the computational flow graph during training
+                bn_lin    += 0.*(self.tWeights[mean_name].sum()+self.tWeights[var_name].sum())
         #Elementwise nonlinearity
         lin_out = lin
         if onlyLinear:

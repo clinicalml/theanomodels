@@ -131,6 +131,7 @@ class VAE(BaseModel, object):
         X   = T.matrix('X',   dtype=config.floatX)
         eps = T.matrix('eps', dtype=config.floatX)
         X.tag.test_value, eps.tag.test_value   = self._fakeData()
+        self.updates_ack = True
         #Learning Rates and annealing objective function
         #Add them to npWeights/tWeights to be tracked [do not have a prefix _W or _b so wont be diff.]
         self._addWeights('lr', np.asarray(self.params['lr'],dtype=config.floatX),borrow=False)

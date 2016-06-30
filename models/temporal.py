@@ -64,6 +64,7 @@ class LSTM(BaseModel, object):
         """
                                         Build Model
         """
+        self.updates_ack= True
         #Expecting (X: batch_size x T x input_dim)
         X             = T.tensor3('X',   dtype=config.floatX)
         M             = T.matrix('M',    dtype=config.floatX)
