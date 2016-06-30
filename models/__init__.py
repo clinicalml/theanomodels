@@ -67,7 +67,7 @@ class BaseModel:
         """
         _p: print formatted string
         """
-        toPrint = '\t<<',stringToPrint,'>>'
+        toPrint = '\t<<'+str(stringToPrint)+'>>'
         print toPrint
         if logThis and hasattr(self,'logf'):
             self.logf.write(toPrint+'\n')
