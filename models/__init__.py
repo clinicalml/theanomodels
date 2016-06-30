@@ -5,7 +5,7 @@ import six.moves.cPickle as pickle
 from collections import OrderedDict
 import sys, time, os
 import numpy as np
-import gzip
+import gzip, warnings
 import theano
 from theano import config
 theano.config.compute_test_value = 'warn'
@@ -60,8 +60,14 @@ class BaseModel:
             self.tOptWeights  = None
         start_time = time.time()
         self.srng = RandomStreams(params['seed'])
+        #Use this for updates that you might need to specify differently from your training function. 
+        #Used for batch normalization 
+        self.updates     = []
+        self.updates_ack = False
+
         self._buildModel()
         self._p(('_buildModel took : %.4f seconds')%(time.time()-start_time))
+        assert self.updates_ack is True,'Need to acknowledge updates variable. Set updates_ack in buildModel'
         assert self.tOptWeights is not None, 'Need to have optimization weights specified when building model'
     def _p(self,stringToPrint,logThis=False):
         """
@@ -158,7 +164,9 @@ class BaseModel:
                 self._p('WARNING: '+name+' will not differentiated with respect to')
             self.npWeights[name] = data.astype(config.floatX)
             self.tWeights[name]  = theano.shared(self.npWeights[name], name=name,**kwargs)
-    
+        else:
+            warnings.warn(name+" found in npWeights. No action taken")
+
     def _getModelParams(self, restrict = ''):
         """
         Return list of model parameters to take derivatives with respect to
@@ -336,14 +344,60 @@ class BaseModel:
             return maxout_out
         else:
             return T.tanh(lin_out)
-        
+    
+    def _BNlayer(self, W, b, inp, onlyLinear = False, validation=False, convolution=False):
+        """
+                                Batch normalization layer
+        Based on the implementation from: https://github.com/shuuki4/Batch-Normalization
+        a) Support for 3D tensors (for time series data) - here, the last layer is the dimension of the data
+        b) Create gamma/beta, create updates for gamma/beta
+        c) Different for train/validation. 
+        d) Different for convolutional layers
+        """
+        W_name     = W.name
+        W_shape    = self.npWeights[W_name].shape
+        assert len(W_shape)==2,'Expecting W to be a matrix: '+str(len(W_shape))
+        gamma_init = np.random.uniform(low=-1./np.sqrt(W_shape[0]),high= 1./np.sqrt(W_shape[1]), size=(W_shape[1],),dtype=config.floatX)
+        beta_init  = np.zeros((W_shape[1],),dtype=config.floatX)
+        gamma_name = W_name+'_BN_gamma'
+        beta_name  = W_name+'_BN_beta'
+        self._addWeights(gamma_name, gamma_init, borrow=True)
+        self._addWeights(beta_name,  beta_init, borrow=True)
+        #Create a running mean that will not be differentiated 
+        mean_name  = W_name.replace('W','').replace('__','_')+'_BN_running_mean'
+        var_name   = W_name.replace('W','').replace('__','_')+'_BN_running_var'
+        mean_init  = np.zeros((W_shape[1],),dtype=config.floatX)
+        var_init   = np.ones((W_shape[1],),dtype=config.floatX)
+        self._addWeights(mean_name, mean_init, borrow=True)
+        self._addWeights(var_name,  var_init, borrow=True)
+        momentum,eps= 0.9, 1e-6
+
+        lin = T.dot(inp,W)+b
+        if convolution:
+            assert False,'Not implemented'
+        else:
+            if validation:
+                pass
+            else:
+                cur_mean   = lin.mean(0) 
+                cur_var    = lin.var(0) 
+                normalized = (lin-cur_mean) / T.sqrt(cur_var+eps) 
+                bn_lin     = self.tWeights[gamma_name]*normalized + self.tWeights[beta_name]
+                self.train_updates.append((self.tWeights[mean_name], momentum * self.tWeights[mean_name] + (1.0-momentum) * cur_mean))
+                self.train_updates.append((self.tWeights[var_name], momentum * self.tWeights[mean_name] + (1.0-momentum) * (float(W_shape[0])/float(W_shape[0]-1))* cur_var))
+        #Elementwise nonlinearity
+        lin_out = lin
+        if onlyLinear:
+            return lin_out
+        else:
+            return self._applyNL(lin_out)
+
     def _LinearNL(self, W, b, inp, onlyLinear=False):
         """
         _LinearNL : if onlyLinear: return T.dot(inp,W)+b else return NL(T.dot(inp,W)+b)
         """
         lin = T.dot(inp,W)+b
         lin_out = lin
-
         #If only doing a dot product return as is
         if onlyLinear:
             return lin_out
