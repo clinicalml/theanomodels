@@ -148,7 +148,7 @@ def _processSynthetic(dset):
         return Z_true, X
     if not np.all([os.path.exists(os.path.join(syntheticDIR,fname+'.h5')) for fname in ['synthetic'+str(i) for i in range(1,10)]]):
         #Create all datasets
-        for s in range(1,11):
+        for s in range(9,11):
             print 'Creating: ',s
             dataset = {}
             transition_fxn = params_synthetic['synthetic'+str(s)]['trans_fxn']
