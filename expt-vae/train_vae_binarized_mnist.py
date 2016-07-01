@@ -16,7 +16,7 @@ mapPrint('Options: ',params)
 
 #Setup VAE Model (or reload from existing savefile)
 start_time = time.time()
-from models.static import VAE
+from models.vae import VAE
 displayTime('import vae',start_time, time.time())
 vae    = None
 

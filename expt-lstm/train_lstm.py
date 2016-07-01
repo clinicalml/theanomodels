@@ -16,7 +16,7 @@ mapPrint('Options: ',params)
 
 #Setup VAE Model (or reload from existing savefile)
 start_time = time.time()
-from models.temporal import LSTM
+from models.lstm import LSTM
 displayTime('import LSTM',start_time, time.time())
 lstm    = None
 

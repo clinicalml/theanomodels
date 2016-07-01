@@ -356,7 +356,7 @@ class BaseModel:
         W_name     = W.name
         W_shape    = self.npWeights[W_name].shape
         assert len(W_shape)==2,'Expecting W to be a matrix: '+str(len(W_shape))
-        gamma_init = np.random.uniform(low=-1./np.sqrt(W_shape[0]),high= 1./np.sqrt(W_shape[1]), size=(W_shape[1],),dtype=config.floatX)
+        gamma_init = np.random.uniform(low=-1./np.sqrt(W_shape[0]),high= 1./np.sqrt(W_shape[1]), size=(W_shape[1],)).astype(config.floatX)
         beta_init  = np.zeros((W_shape[1],),dtype=config.floatX)
         gamma_name = W_name+'_BN_gamma'
         beta_name  = W_name+'_BN_beta'
@@ -370,7 +370,6 @@ class BaseModel:
         self._addWeights(mean_name, mean_init, borrow=True)
         self._addWeights(var_name,  var_init, borrow=True)
         momentum,eps= 0.9, 1e-6
-
         lin = T.dot(inp,W)+b
         if convolution:
             assert False,'Not implemented'
@@ -388,7 +387,7 @@ class BaseModel:
                 #Add to the computational flow graph during training
                 bn_lin    += 0.*(self.tWeights[mean_name].sum()+self.tWeights[var_name].sum())
         #Elementwise nonlinearity
-        lin_out = lin
+        lin_out = bn_lin
         if onlyLinear:
             return lin_out
         else:
