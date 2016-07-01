@@ -53,6 +53,7 @@ class LSTM(BaseModel, object):
         """
                                         Setup LSTM RNN 
         """
+        #X_embed      = self._BNlayer(self.tWeights['W_input'],self.tWeights['b_input'],X,validation=dropout_prob==0.)
         X_embed      = self._LinearNL(self.tWeights['W_input'],self.tWeights['b_input'],X)
         lstm_output  = self._LSTMlayer(X_embed, 'l', dropout_prob = dropout_prob)
         lstm_output  = lstm_output.swapaxes(0,1)
@@ -64,7 +65,6 @@ class LSTM(BaseModel, object):
         """
                                         Build Model
         """
-        self.updates_ack= True
         #Expecting (X: batch_size x T x input_dim)
         X             = T.tensor3('X',   dtype=config.floatX)
         M             = T.matrix('M',    dtype=config.floatX)
@@ -90,7 +90,10 @@ class LSTM(BaseModel, object):
                                                         reg_value= self.params['reg_value'],
                                                         grad_norm = 1.,
                                                         divide_grad = M.sum())
-        
+            self.updates_ack= True
+            self._p('Added '+str(len(self.updates))+' updates')
+            optimizer_up+=self.updates
+             
             self.train      = theano.function([X, M], nll_t, updates = optimizer_up)
             self.train_debug= theano.function([X, M],[nll_t,norm_list[0],norm_list[1],norm_list[2]],updates = optimizer_up)
         self.evaluate   = theano.function([X, M],nll_e)

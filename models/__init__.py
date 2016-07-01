@@ -378,12 +378,19 @@ class BaseModel:
                 normalized = (lin-self.tWeights[mean_name])/T.sqrt(self.tWeights[var_name]+eps)
                 bn_lin     = self.tWeights[gamma_name]*normalized + self.tWeights[beta_name]
             else:
-                cur_mean   = lin.mean(0) 
-                cur_var    = lin.var(0) 
-                normalized = (lin-cur_mean) / T.sqrt(cur_var+eps) 
-                bn_lin     = self.tWeights[gamma_name]*normalized + self.tWeights[beta_name]
+                if lin.ndim==2: 
+                    cur_mean   = lin.mean(0) 
+                    cur_var    = lin.var(0) 
+                elif lin.ndim==3:
+                    #For now, normalizing across time
+                    cur_mean   = lin.mean((0,1))
+                    cur_var    = lin.var((0,1))
+                else:
+                    assert False,'No support for tensors greater than 4D'
+                normalized     = (lin-cur_mean) / T.sqrt(cur_var+eps)
+                bn_lin         = self.tWeights[gamma_name]*normalized + self.tWeights[beta_name]
                 self.updates.append((self.tWeights[mean_name], momentum * self.tWeights[mean_name] + (1.0-momentum) * cur_mean))
-                self.updates.append((self.tWeights[var_name], momentum * self.tWeights[var_name] + (1.0-momentum) * (float(W_shape[0])/float(W_shape[0]-1))* cur_var))
+                self.updates.append((self.tWeights[var_name],  momentum * self.tWeights[var_name] + (1.0-momentum) * (float(W_shape[0])/float(W_shape[0]-1))* cur_var))
                 #Add to the computational flow graph during training
                 bn_lin    += 0.*(self.tWeights[mean_name].sum()+self.tWeights[var_name].sum())
         #Elementwise nonlinearity
