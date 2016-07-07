@@ -19,5 +19,5 @@ def Bhattacharrya(mu_1,cov_1,mu_2,cov_2):
     """
     diff = mu_1-mu_2
     P    = (cov_2+cov_1)/2
-    D_B  = (1/8.)*(diff**2)/P + (1/2.)*T.log(P/T.sqrt(cov_2*cov_1))
+    D_B  = (1/8.)*(diff**2)/P + (1/2.)*(T.log(P) -0.5*T.log(cov_2)-0.5*T.log(cov_1))
     return D_B.sum()
