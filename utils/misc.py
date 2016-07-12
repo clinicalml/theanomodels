@@ -111,3 +111,27 @@ def trainValidTestIdx(N, train_frac = 0.80, test_frac  = 0.5):
 
 def getConfigFile(fname):
     return fname.replace('final.h5','').split('EP')[0]+'config.pkl'
+
+def getUniqueIDFromParams(l_params, short_names = {}):
+    """ 
+        Inputs: l_params is a list of parameter hashmaps
+        Assumption: l_params[0] is a hashmap that contains keys found in l_params[idx] for all idx 
+        Goal: Return strings corresponding to keys k such that l_params[idx][k]~=l_params[!idx][k] 
+        useful when looking at runs across different configurations
+        short_names is an optional map that could contain short forms for some/all of the keys in params
+                    if unavailable, the long name is used
+    """ 
+    all_keys = l_params[0].keys()
+    umap     = {}
+    names    = ['' for p in l_params]
+    for k in all_keys:
+        if k in ['unique_id','savedir']:
+            continue
+        unique_vals = set([l_params[idx][k] for idx in range(len(l_params))])
+        kname = k
+        if k in short_names:
+            kname = short_names[k]
+        if len(unique_vals)>1:
+            for idx,p in enumerate(l_params):
+                names[idx]+='-'+kname+'-'+str(p[k])
+    return names
