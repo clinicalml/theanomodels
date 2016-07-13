@@ -411,6 +411,11 @@ class BaseModel:
             return lin_out
         else:
             return self._applyNL(lin_out)
+    def _LinearDropoutNL(self, W, b, inp, p=0.):
+        """ Linear + Dropout+ NL """
+        lin = T.dot(inp,W)+b
+        dlin= self._dropout(lin, p=p)
+        return self._applyNL(dlin)
     
     def _dropout(self, X, p=0.):
         """
