@@ -10,9 +10,12 @@ python2.7
 This wrapper takes care of some basic bookkeeping 
 for any model and leaves the rest up to the user. In this case, 
 this package defines a base model that can be inherited from. The
-base model provides functionality to (1) save weights
-intermittently (2) load from checkpoints (3) use common initialization schemes 
-for matrices used in deep learning. The rest is up to the user to specify in theano.
+base model provides functionality to 
+* save weights/model parameters intermittently 
+* load from checkpoints 
+* use common initialization schemes, batch normalization, dropout etc. 
+
+The wrapper can be trivially extended to include more complex functionality depending on the project.
 
 ## Defining a Model
 
