@@ -135,3 +135,19 @@ def getUniqueIDFromParams(l_params, short_names = {}):
             for idx,p in enumerate(l_params):
                 names[idx]+='-'+kname+'-'+str(p[k])
     return names
+
+def productOfBernoullisMLE(train, test):
+    """
+        MLE estimator for product of bernoullis
+        Input: train/test datasets (2D numpy arrays)
+        Output:value of NLL, ML params
+    """
+    assert train.ndim==2 and test.ndim==2,'Expecting 2D arrays for train/test'
+    assert np.unique(train).sum() in [0.,1.] and np.unique(test).sum() in [0.,1.],'Expecting sum to be 0/1'
+    eps = 1e-6
+    params      = train.mean(0,keepdims=True)
+    NLL_test    = -(np.log(params+eps)*test + np.log(1.-params+eps)*(1.-test))
+    NLL_train   = -(np.log(params+eps)*train+ np.log(1.-params+eps)*(1.-train))
+    return NLL_train.sum()/float(train.shape[0]), NLL_test.sum()/float(test.shape[0]), params
+
+
