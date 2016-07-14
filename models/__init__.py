@@ -22,14 +22,20 @@ class BaseModel:
     
     TODO: Does preserve randomness, i.e the random seeds would be different when restarted (low priority)
     """
-    def __init__(self, params, paramFile=None, reloadFile=None):
+    def __init__(self, params, paramFile=None, reloadFile=None, dataset = np.array(0)):
         """
         MLModel
         params : Hashtable with parameters relevant to the model at hand
         paramFile : Location to save parameter file
         reloadFile: [Reloading Model from npz]
+        dataset: (Optional) This is used when the dataset needs to be on the GPU. 
+                            Set dataset to be the training data. During learning, you can then index 
+                            self.dataset (which will be a theano shared variable) like so:
+                            X = self.dataset[bidx] to represent the current batch
+                            This will save on I/O but will cost you space on the GPU
         """
         np.random.seed(params['seed'])
+        self.dataset = theano.shared(dataset)
         assert paramFile is not None,'Need to specify paramFile, either to create or to load from'
         if reloadFile is not None:
             self._p('Reloading Model')
