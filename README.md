@@ -8,14 +8,21 @@ python2.7
 
 ## Overview
 This wrapper takes care of some basic bookkeeping 
-for any model and leaves the rest up to the user. In this case, 
-this package defines a base model that can be inherited from. The
-base model provides functionality to 
+a machine learning model built in theano. It is designed to be lightweight, easy to extend and minimalistic. 
+
+In this case, 
+this package defines a base model that can be inherited from.
 * save weights/model parameters intermittently 
 * load from checkpoints 
 * use common initialization schemes, batch normalization, dropout etc. 
 
 The wrapper can be trivially extended to include more complex functionality depending on the project.
+
+## Installation
+Clone this repository to /path/to/theanomodels and then append the following to your ~/.profile or ~/.bashrc file
+```
+export PYTHONPATH=$PYTHONPATH:/path/to/theanomodels
+```
 
 ## Defining a Model
 
@@ -68,9 +75,3 @@ length sequences.
 
 ## Experimental Setup
 See expt-bmnist for details on setting up an experiment. 
-
-## Installation
-Clone this repository to /path/to/theanomodels and then append the following to your ~/.profile or ~/.bashrc file
-```
-export PYTHONPATH=$PYTHONPATH:/path/to/theanomodels
-```
