@@ -23,7 +23,7 @@ class BaseModel:
     TODO: Does preserve randomness, i.e the random seeds would be different when restarted (low priority)
     """
     def __init__(self, params, paramFile=None, reloadFile=None, 
-            dataset_train = np.array(0), dataset_eval = np.array(0), dataset_test = np.array(0)):
+            dataset_train = np.array(0), dataset_valid= np.array(0), dataset_test = np.array(0)):
         """
         MLModel
         params : Hashtable with parameters relevant to the model at hand
@@ -37,9 +37,12 @@ class BaseModel:
                             This will save on I/O but will cost you space on the GPU
         """
         np.random.seed(params['seed'])
-        self.dataset_eval  = theano.shared(dataset_train.astype(config.floatX))
-        self.dataset_train = theano.shared(dataset_eval.astype(config.floatX))
+        self.dataset_train = theano.shared(dataset_train.astype(config.floatX))
+        self.dataset_valid = theano.shared(dataset_valid.astype(config.floatX))
         self.dataset_test  = theano.shared(dataset_test.astype(config.floatX))
+        self.Ntrain        = dataset_train.shape[0]
+        self.Nvalid        = dataset_valid.shape[0]
+        self.Ntest         = dataset_test.shape[0]
         assert paramFile is not None,'Need to specify paramFile, either to create or to load from'
         if reloadFile is not None:
             self._p('Reloading Model')
