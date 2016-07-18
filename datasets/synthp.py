@@ -1,4 +1,3 @@
-#
 '''
 Parameters for synthetic examples using pykalman
 (For linear models specify all, non-linear, just the ones that are relevant)
