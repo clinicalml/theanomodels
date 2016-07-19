@@ -23,7 +23,7 @@ class BaseModel:
     TODO: Does preserve randomness, i.e the random seeds would be different when restarted (low priority)
     """
     def __init__(self, params, paramFile=None, reloadFile=None, 
-            dataset_train = np.array(0), dataset_valid= np.array(0), dataset_test = np.array(0)):
+            dataset_train = np.array([0]), dataset_valid= np.array([0]), dataset_test = np.array([0])):
         """
         MLModel
         params : Hashtable with parameters relevant to the model at hand
