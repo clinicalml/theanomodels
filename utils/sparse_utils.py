@@ -1,0 +1,68 @@
+from scipy.sparse import csr_matrix,csc_matrix
+import os,sys,h5py
+import numpy as np
+"""
+Utilities for sparse matrices
+"""
+def saveSparseHDF5(matrix, prefix, fname):
+    """ matrix: sparse matrix
+    prefix: prefix of dataset 
+    fname : name of h5py file where matrix will be saved
+    """
+    assert matrix.__class__==csr_matrix or matrix.__class__==csc_matrix,'Expecting csc/csr'
+    with h5py.File(fname,mode='a') as f:
+        for info in ['data','indices','indptr','shape']:
+            key = '%s_%s'%(prefix,info)
+            try:
+                data = getattr(matrix, info)
+            except:
+                assert False,'Expecting attribute '+info+' in matrix'
+            f.create_dataset(key,data= data)
+        key = prefix+'_type'
+        val = matrix.__class__.__name__
+        f.attrs[key] = np.string_(val)
+
+def loadSparseHDF5(prefix, fname):
+    """ Load from matrix """
+    params= []
+    data  = None
+    with h5py.File(fname, mode='r') as f:
+        for info in ['data','indices','indptr','shape']:
+            key = '%s_%s'%(prefix,info)
+            params.append(f[key].value)
+        key = prefix+'_type'
+        dtype=f.attrs[key]
+        if dtype=='csc_matrix':
+            data = csc_matrix(tuple(params[:3]),shape=params[3])
+        elif dtype=='csr_matrix':
+            data = csr_matrix(tuple(params[:3]),shape=params[3])
+        else:
+            assert False,'Not supported: '+dtype 
+    return data
+
+def _testSparse():
+    m1    = np.random.randn(4,12)
+    m1[:,3:8] = 0
+    m1[0:2,:] = 0
+    csr_1 = csr_matrix(m1)
+    csc_1 = csc_matrix(m1)
+    m2    = np.random.randn(4,12)
+    csr_2 = csr_matrix(m2)
+    csc_2 = csc_matrix(m2)
+    fname = 'tmp.h5'
+    saveSparseHDF5(csc_1, 'c1', fname)
+    saveSparseHDF5(csr_1, 'r1', fname)
+    saveSparseHDF5(csc_2, 'c2', fname)
+    saveSparseHDF5(csr_2, 'r2', fname)
+    l_csc_1 = loadSparseHDF5('c1', fname)
+    l_csr_1 = loadSparseHDF5('r1', fname)
+    l_csc_2 = loadSparseHDF5('c2', fname)
+    l_csr_2 = loadSparseHDF5('r2', fname)
+    result = 0.
+    for init,final in zip([csc_1,csr_1,csc_2,csr_2],[l_csc_1,l_csr_1,l_csc_2,l_csr_2]):
+        result += (init-final).sum() +(init.toarray()-final.toarray()).sum()
+    print 'Diff b/w saved vs loaded matrices',result
+    os.unlink(fname)
+
+if __name__=='__main__':
+    _testSparse()
