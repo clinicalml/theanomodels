@@ -143,11 +143,35 @@ def productOfBernoullisMLE(train, test):
         Output:value of NLL, ML params
     """
     assert train.ndim==2 and test.ndim==2,'Expecting 2D arrays for train/test'
-    assert np.unique(train).sum() in [0.,1.] and np.unique(test).sum() in [0.,1.],'Expecting sum to be 0/1'
+    if train.__class__.__name__=='ndarray':
+        assert np.unique(train).sum() in [0.,1.] and np.unique(test).sum() in [0.,1.],'Expecting sum to be 0/1'
+    elif train.__class__.__name__=='csr_matrix' or train.__class__.__name__=='csc_matrix':
+        assert sum(set(train.data))==1. in [0.,1.] and sum(set(test.data)) in [0.,1.],'Expecting sum to be in 0/1'
+    else:
+        assert False,'Invalid input type: '+train.__class__.__name__
     eps = 1e-6
-    params      = train.mean(0,keepdims=True)
-    NLL_test    = -(np.log(params+eps)*test + np.log(1.-params+eps)*(1.-test))
-    NLL_train   = -(np.log(params+eps)*train+ np.log(1.-params+eps)*(1.-train))
-    return NLL_train.sum()/float(train.shape[0]), NLL_test.sum()/float(test.shape[0]), params
+    if train.__class__.__name__=='ndarray':
+        params      = train.mean(0,keepdims=True)
+        NLL_test    = -(np.log(params+eps)*test + np.log(1.-params+eps)*(1.-test))
+        NLL_train   = -(np.log(params+eps)*train+ np.log(1.-params+eps)*(1.-train))
+        return NLL_train.sum()/float(train.shape[0]), NLL_test.sum()/float(test.shape[0]), params
+    else: #must be sparse
+        params      = np.asarray(train.mean(0))
+        if train.__class__.__name__=='csc_matrix' or test.__class__.__name__=='csc_matrix':
+            train_mat = train.tocsr()
+            test_mat  = test.tocsr()
+        else:
+            train_mat = train
+            test_mat  = test
+        NLL_train, NLL_test = 0., 0.
+        for k in range(max(train_mat.shape[0],test.shape[0])):
+            if k<train.shape[0]:
+                NLL_train += (-(np.log(params+eps)*train_mat[k].toarray()+ np.log(1.-params+eps)*(1.-train_mat[k].toarray()))).sum()
+            if k<test.shape[0]:
+                NLL_test  += (-(np.log(params+eps)*test_mat[k].toarray() + np.log(1.-params+eps)*(1.-test_mat[k].toarray()))).sum() 
+        NLL_test  /=float(test.shape[0])
+        NLL_train /=float(train.shape[0])
+        return NLL_train, NLL_test, params
 
-
+if __name__=='__main__':
+    pass
