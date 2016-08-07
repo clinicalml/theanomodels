@@ -9,6 +9,11 @@ def readPickle(fname, nobjects =1):
             obj.append(pickle.load(f))
     return obj
 
+def savePickle(list_of_objects, fname):
+    with open(fname,'wb') as f:
+        for obj in list_of_objects:
+            pickle.dump(obj, f)
+
 def removeIfExists(fname):
     if os.path.exists(fname):
         os.remove(fname)
