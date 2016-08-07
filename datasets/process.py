@@ -182,4 +182,4 @@ if __name__=='__main__':
     _processMNIST()
     _processBinarizedMNIST()
     _processPolyphonic('jsb')
-    _processSynthetic('synthetic2')
+    _processSynthetic('synthetic9')
