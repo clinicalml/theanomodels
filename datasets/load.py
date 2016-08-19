@@ -94,6 +94,7 @@ def _cifar10():
     dataset['num_channels'] = dataset['train'].shape[-3] 
     dataset['dim_h']  = dataset['train'].shape[-2] 
     dataset['dim_w']  = dataset['train'].shape[-1] 
+    dataset['data_type']  = 'image'
     h5f.close()
     return dataset
 
