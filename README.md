@@ -36,8 +36,8 @@ and self.optWeights which contains all the optimization parameters.
 Defining a model involves a few steps: 
 
 - Inherit a class from BaseModel 
-- Define self.createParams() which is expected to return dictionary (self.npWeights) containing numpy weight matrices representing the model parameters. The keys of the dictionary will be used to represent the names of each of the parameters in the model.
-- The base class turns the aforementioned numpy matrices into theano shared variables and saves them in a dictionary (self.tWeights) with the same keys as self.npWeights
+- Define self.createParams() which is expected to return an Ordered dictionary (self.npWeights) containing numpy weight matrices representing the model parameters. The keys of the dictionary will be used to represent the names of each of the parameters in the model.
+- The base class turns the aforementioned numpy matrices into theano shared variables and places them in a dictionary (self.tWeights) with the same keys as self.npWeights
 - Define self.buildModel() using theano shared variables (from self.tWeights) and create theano functions to train/evaluate/introspect and anything else you might be interested in
 - Define other functions like self.learn to perform learning in the model, self.evaluate for validation, self.sample for generative models etc.
 
@@ -51,11 +51,10 @@ regularization and define updates to parameters with variable learning rates.
 
 **IMPORTANT**: The T.grad function is called on the model parameters which are defined as variable in self.tWeights whose name
 contains a string in ['W_','b_','U_','_W','_b','_U']. The code prints out the variables that the cost is
-being differentiated with respect to. It is worthwhile to sanity check this while building the model.
+being differentiated with respect to. It is worthwhile to sanity check this while building the model to make sure the relevant parameters are being differentiated.
 
 The naming convention I usually use is 
 'model_W_modelsubpart'. For example 'p_W_input' 
-
 
 models/__init__.py contains a simple LSTM unit.
 It requires the definition of parameters named: 'W_lstm', 'U_lstm' and 'b_lstm'
@@ -72,6 +71,7 @@ the process/load and the method inside the model that is used to perform learnin
 Data is typically represented as a N x dim_observation sized matrix. For time series data,
 we specify a N x maxT x dim_observation sized tensor as the data and a N x maxT sized mask matrix for variable
 length sequences. 
+
 
 ## Experimental Setup
 See expt-bmnist for details on setting up an experiment. 
