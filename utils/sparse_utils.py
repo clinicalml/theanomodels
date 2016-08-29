@@ -1,4 +1,5 @@
-from scipy.sparse import csr_matrix,csc_matrix
+from scipy.sparse import csr_matrix,csc_matrix,coo_matrix
+import time
 import os,sys,h5py
 import numpy as np
 """
@@ -63,6 +64,33 @@ def _testSparse():
         result += (init-final).sum() +(init.toarray()-final.toarray()).sum()
     print 'Diff b/w saved vs loaded matrices',result
     os.unlink(fname)
+
+def readSparseFile(fname, MAXDIM, zeroIndexed=True):
+    """
+    Sparse format : 
+    l1: #non-zero elements idx:val idx2:val2 idx3:val3
+    """
+    from tqdm import tqdm
+    start = time.time()
+    row, col, val  = [],[],[]
+    for idx, line in tqdm(enumerate(open(fname,'r'))):
+        words= line.strip().split(' ')
+        for sp_w in words[1:]:
+            dd = sp_w.split(':')
+            cval = int(dd[0])
+            if not zeroIndexed:
+                cval-=1
+            col.append(cval)
+            val.append(int(dd[1]))
+        row += [idx]*len(words[1:])
+        if idx%5000==0:
+            assert len(row)==len(col),'Failure.1'+str(len(row))+' vs '+str(len(col))
+            assert len(val)==len(col),'Failure.2'+str(len(val))+' vs '+str(len(col))
+    matrix = coo_matrix((val,(row,col)),shape=(idx+1,MAXDIM))
+    val,row,col=None,None,None
+    cmat   = matrix.tocsr()
+    print 'Time Taken: ',(time.time()-start)/60.,' minutes'
+    return cmat
 
 if __name__=='__main__':
     _testSparse()

@@ -65,9 +65,10 @@ def getLowestError(mat):
     """ 
     Get the lowest error in Kx2 matrix. Col 0: Epochs, Col 1: Val. Error
     """
-    idxMin  = np.argmin(mat[:,1])
-    epochMin= mat[int(idxMin),0]
-    valMin  = mat[int(idxMin),1]
+    mat_tmp = mat[~np.isnan(mat).any(axis=1)]
+    idxMin  = np.argmin(mat_tmp[:,1])
+    epochMin= mat_tmp[int(idxMin),0]
+    valMin  = mat_tmp[int(idxMin),1]
     return epochMin, valMin, idxMin
 
 def setNumpyFloatPrint():
@@ -177,6 +178,24 @@ def productOfBernoullisMLE(train, test):
         NLL_test  /=float(test.shape[0])
         NLL_train /=float(train.shape[0])
         return NLL_train, NLL_test, params
+
+def downloadData(DIR, locations):
+    for fname in locations:
+        if not os.path.exists(DIR+'/'+fname):
+            cmd = 'curl -o '+DIR+'/'+fname+' '+locations[fname]
+            print 'Executing: ',cmd
+            os.system(cmd)
+            if not os.path.exists(DIR+'/'+fname):
+                cmd = 'wget '+locations[fname]+' -O '+DIR+'/'+fname
+                print 'Execute: ',cmd
+                os.system(cmd)
+            if not os.path.exists(DIR+'/'+fname):
+                print 'Not found:',DIR+'/'+fname
+                assert False,"Failed download. Try echo 'cacert=/etc/ssl/certs/ca-certificates.crt' > ~/.curlrc"
+            """ If this fails, try this to give curl the locations of certificates:
+            echo 'cacert=/etc/ssl/certs/ca-certificates.crt' > ~/.curlrc
+            """
+            print 'Downloaded: ',fname,'\n'
 
 if __name__=='__main__':
     pass
