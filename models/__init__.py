@@ -23,7 +23,11 @@ class BaseModel:
     TODO: Does preserve randomness, i.e the random seeds would be different when restarted (low priority)
     """
     def __init__(self, params, paramFile=None, reloadFile=None, 
-            dataset_train = np.array([0]), dataset_valid= np.array([0]), dataset_test = np.array([0])):
+            additional_attrs = {},
+            dataset_train = np.array([0]), 
+            dataset_valid= np.array([0]), 
+            dataset_test = np.array([0]), 
+            dataset = np.array([0])):
         """
         MLModel
         params : Hashtable with parameters relevant to the model at hand
@@ -43,6 +47,8 @@ class BaseModel:
         self.Ntrain        = dataset_train.shape[0]
         self.Nvalid        = dataset_valid.shape[0]
         self.Ntest         = dataset_test.shape[0]
+        self.dataset       = theano.shared(dataset.astype(config.floatX))
+        self.Ndataset      = dataset.shape[0]
         assert paramFile is not None,'Need to specify paramFile, either to create or to load from'
         if reloadFile is not None:
             self._p('Reloading Model')
@@ -53,7 +59,9 @@ class BaseModel:
             assert self.npWeights is not None,'Expecting self.npWeights to be defined' 
             self._saveParams(paramFile)
         self.tWeights = self._makeTheanoShared(self.npWeights)
-        #Added on May 10: In case previous model variants do not have some subset of parameters
+        #Added on May 10: Backwards compatibility. If you add more parameters to params, you'd like to 
+        #be able to add them into the params so that you can build old models on potentially different
+        #configurations. 
         for k in params:
             if (k in params and k not in self.params) or self.params[k]!=params[k]:
                 print 'Adding/Modifying loaded parameters: ',k,' to ',params[k]
@@ -76,6 +84,16 @@ class BaseModel:
         #Used for batch normalization 
         self.updates     = []
         self.updates_ack = False
+
+        #Adding additional attributes to the base class
+        for attr in additional_attrs:
+            val = additional_attrs[attr]
+            if val is not None and val.__class__.__name__=='ndarray':
+                self._p('Setting '+attr+' as theano shared variable')
+                setattr(self,attr,theano.shared(val))
+            else:
+                self._p('Setting '+attr+' to '+str(val))
+                setattr(self,attr,val)
 
         self._buildModel()
         self._p(('_buildModel took : %.4f seconds')%(time.time()-start_time))
