@@ -90,7 +90,7 @@ class BaseModel:
             val = additional_attrs[attr]
             if val is not None and val.__class__.__name__=='ndarray':
                 self._p('Setting '+attr+' as theano shared variable')
-                setattr(self,attr,theano.shared(val))
+                setattr(self,attr,theano.shared(val.astype(config.floatX)))
             else:
                 self._p('Setting '+attr+' to '+str(val))
                 setattr(self,attr,val)
