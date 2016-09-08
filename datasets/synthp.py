@@ -11,6 +11,7 @@ def linear_obs(z,fxn_params = {},ns=None):
     return 0.5*z
 def nlinear_trans_learn(z, fxn_params = {}, ns=None): 
     return 2*np.sin(fxn_params['alpha']*z)+z
+
 params_synthetic = {}
 params_synthetic['synthetic9'] = {}
 params_synthetic['synthetic9']['trans_fxn']   = linear_trans

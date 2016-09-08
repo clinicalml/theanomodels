@@ -12,7 +12,7 @@ def linear_obs(z,fxn_params = {}, ns=None):
     return 0.5*z
 def nlinear_trans(z, fxn_params = {}, ns=None): 
     return 2*T.sin(z)+z
-def nlinear_trans_learn(z, fxn_params = {}, ns = None)
+def nlinear_trans_learn(z, fxn_params = {}, ns = None):
     return 2*T.sin(fxn_params['alpha']*z) + z
 
 def updateParamsSynthetic(params_synthetic):

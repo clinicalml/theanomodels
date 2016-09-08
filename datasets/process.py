@@ -127,7 +127,7 @@ def _processSynthetic(dset):
     if not os.path.exists(syntheticDIR):
         os.mkdir(syntheticDIR)
     fname = syntheticDIR+'/'+dset+'.h5'
-    assert dset=='synthetic9' or dset=='synthetic10','Only synthetic 9/10 supported'
+    assert dset in ['synthetic9','synthetic10','synthetic11'] ,'Only synthetic 9/10/11 supported'
     if os.path.exists(fname):
         print 'Found: ',fname
         return fname
@@ -136,16 +136,16 @@ def _processSynthetic(dset):
     def sampleGaussian(mu, cov):
         assert type(cov) is float or type(cov) is np.array,'invalid type: '+str(cov)+' type: '+str(type(cov))
         return mu + np.random.randn(*mu.shape)*np.sqrt(cov)
-    def createDataset(N, T, t_fxn, e_fxn, init_mu, init_cov, trans_cov, obs_cov):
+    def createDataset(N, T, t_fxn, e_fxn, init_mu, init_cov, trans_cov, obs_cov, model_params):
         all_z = []
         z_prev= sampleGaussian(np.ones((N,1,1))*init_mu, init_cov)
         all_z.append(np.copy(z_prev))
         for t in range(T-1):
-            z_prev = sampleGaussian(t_fxn(z_prev), trans_cov) 
+            z_prev = sampleGaussian(t_fxn(z_prev,fxn_params=model_params), trans_cov) 
             all_z.append(z_prev)
         Z_true= np.concatenate(all_z, axis=1)
         assert Z_true.shape[1]==T,'Expecting T in dim 2 of Z_true'
-        X     = sampleGaussian(e_fxn(Z_true), obs_cov)
+        X     = sampleGaussian(e_fxn(Z_true, fxn_params = model_params), obs_cov)
         return Z_true, X
     if not np.all([os.path.exists(os.path.join(syntheticDIR,fname+'.h5')) for fname in ['synthetic'+str(i) for i in range(9,11)]]):
         #Create all datasets
@@ -158,14 +158,15 @@ def _processSynthetic(dset):
             init_cov       = params_synthetic['synthetic'+str(s)]['init_cov']
             trans_cov      = params_synthetic['synthetic'+str(s)]['trans_cov']
             obs_cov        = params_synthetic['synthetic'+str(s)]['obs_cov']
+            model_params   = params_synthetic['synthetic'+str(s)]['params']
             Ntrain = 5000
             Ttrain = 25
             Ttest  = 50
             Nvalid = 500
             Ntest  = 500
-            train_Z, train_dataset  = createDataset(Ntrain, Ttrain, transition_fxn, emission_fxn, init_mu, init_cov, trans_cov, obs_cov) 
-            valid_Z, valid_dataset  = createDataset(Nvalid, Ttrain, transition_fxn, emission_fxn, init_mu, init_cov, trans_cov, obs_cov) 
-            test_Z,  test_dataset   = createDataset(Ntest, Ttest, transition_fxn, emission_fxn, init_mu, init_cov, trans_cov, obs_cov) 
+            train_Z, train_dataset  = createDataset(Ntrain, Ttrain, transition_fxn, emission_fxn, init_mu, init_cov, trans_cov, obs_cov, model_params) 
+            valid_Z, valid_dataset  = createDataset(Nvalid, Ttrain, transition_fxn, emission_fxn, init_mu, init_cov, trans_cov, obs_cov, model_params) 
+            test_Z,  test_dataset   = createDataset(Ntest, Ttest, transition_fxn, emission_fxn, init_mu, init_cov, trans_cov, obs_cov, model_params) 
             savefile       = syntheticDIR+'/synthetic'+str(s)+'.h5' 
             h5file = h5py.File(savefile,mode='w')
             h5file.create_dataset('train_z', data=train_Z)
@@ -182,4 +183,4 @@ if __name__=='__main__':
     _processMNIST()
     _processBinarizedMNIST()
     _processPolyphonic('jsb')
-    _processSynthetic('synthetic9')
+    _processSynthetic('synthetic11')
