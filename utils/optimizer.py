@@ -216,10 +216,9 @@ def adam(cost, params, lr=0.001, b1=0.1, b2=0.001, e=1e-8, opt_params = None,
         if grad_range is not None:
             print '<<<<<< ADAM: Truncating Gradients in Range +-(',grad_range,') >>>>>>'
             g = T.clip(g,-grad_range, grad_range)
-        
         if restartOpt:
-            m = theano.shared(p.get_value() * 0.,name = 'opt_m_'+p.name,borrow=True)
-            v = theano.shared(p.get_value() * 0.,name = 'opt_v_'+p.name,borrow=True)
+            m = theano.shared(np.array(p.get_value() * 0.).astype(config.floatX),name = 'opt_m_'+p.name,borrow=True)
+            v = theano.shared(np.array(p.get_value() * 0.).astype(config.floatX),name = 'opt_v_'+p.name,borrow=True)
             opt_params['opt_m_'+p.name] = m
             opt_params['opt_v_'+p.name] = v
         else:

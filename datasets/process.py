@@ -127,7 +127,7 @@ def _processSynthetic(dset):
     if not os.path.exists(syntheticDIR):
         os.mkdir(syntheticDIR)
     fname = syntheticDIR+'/'+dset+'.h5'
-    assert dset in ['synthetic9','synthetic10','synthetic11'] ,'Only synthetic 9/10/11 supported'
+    assert dset in ['synthetic9','synthetic10','synthetic11','synthetic12'] ,'Only synthetic 9/10/11 supported'
     if os.path.exists(fname):
         print 'Found: ',fname
         return fname
@@ -147,7 +147,7 @@ def _processSynthetic(dset):
         assert Z_true.shape[1]==T,'Expecting T in dim 2 of Z_true'
         X     = sampleGaussian(e_fxn(Z_true, fxn_params = model_params), obs_cov)
         return Z_true, X
-    if not np.all([os.path.exists(os.path.join(syntheticDIR,fname+'.h5')) for fname in ['synthetic'+str(i) for i in range(9,11)]]):
+    if not np.all([os.path.exists(os.path.join(syntheticDIR,fname+'.h5')) for fname in ['synthetic'+str(i) for i in range(9,13)]]):
         #Create all datasets
         for s in range(9,12):
             print 'Creating: ',s
@@ -160,7 +160,7 @@ def _processSynthetic(dset):
             obs_cov        = params_synthetic['synthetic'+str(s)]['obs_cov']
             model_params   = params_synthetic['synthetic'+str(s)]['params']
             Ntrain = 5000
-            Ttrain = 25
+            Ttrain = 25 
             Ttest  = 50
             Nvalid = 500
             Ntest  = 500
