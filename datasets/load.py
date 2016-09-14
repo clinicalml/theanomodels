@@ -173,6 +173,7 @@ def _synthetic(dset):
     datasets['test_z']           = ff['test_z'].value
     datasets['valid_z']          = ff['valid_z'].value
     datasets['dim_observations'] = datasets['train'].shape[2]
+    datasets['dim_stochastic'] = datasets['train_z'].shape[2]
     datasets['dim_actions']      = 0
     datasets['hasMasks']         = False
     datasets['data_type']        = 'real'
