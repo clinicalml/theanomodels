@@ -197,6 +197,16 @@ class BaseModel:
         else:
             warnings.warn(name+" found in npWeights. No action taken")
 
+    def _addUpdate(self, var, data):
+        """
+        Add an update for tWeights
+        """
+        if len(self.updates) > 0 and var in zip(*self.updates)[0]:
+            warnings.warn(var.name+' found in self.updates...no action taken')
+        else:
+            self.updates.append((var,data))
+
+
     def _getModelParams(self, restrict = ''):
         """
         Return list of model parameters to take derivatives with respect to
@@ -375,37 +385,40 @@ class BaseModel:
         else:
             return T.tanh(lin_out)
     
-    def _BNlayer(self, W, b, inp, onlyLinear = False, validation=False, convolution=False):
+    def _BNlayer(self, W, b, inp, onlyLinear = False, evaluation=False, convolution=False,momentum=0.95,eps=1e-3):
         """
                                 Batch normalization layer
         Based on the implementation from: https://github.com/shuuki4/Batch-Normalization
         a) Support for 3D tensors (for time series data) - here, the last layer is the dimension of the data
         b) Create gamma/beta, create updates for gamma/beta
-        c) Different for train/validation. 
+        c) Different for train/evaluation. 
         d) Different for convolutional layers
         """
         W_name     = W.name
         W_shape    = self.npWeights[W_name].shape
         assert len(W_shape)==2,'Expecting W to be a matrix: '+str(len(W_shape))
-        gamma_init = np.random.uniform(low=-1./np.sqrt(W_shape[0]),high= 1./np.sqrt(W_shape[1]), size=(W_shape[1],)).astype(config.floatX)
+        #gamma_init = self._getWeight((W_shape[1],))
+        #beta_init = self._getWeight((W_shape[1],))
+        gamma_init = np.ones((W_shape[1],),dtype=config.floatX)
         beta_init  = np.zeros((W_shape[1],),dtype=config.floatX)
         gamma_name = W_name+'_BN_gamma'
         beta_name  = W_name+'_BN_beta'
         self._addWeights(gamma_name, gamma_init, borrow=True)
         self._addWeights(beta_name,  beta_init,  borrow=True)
         #Create a running mean that will not be differentiated 
-        mean_name  = W_name.replace('W','').replace('__','_')+'_BN_running_mean'
-        var_name   = W_name.replace('W','').replace('__','_')+'_BN_running_var'
+        mean_name  = W_name.replace('W','').replace('__','_')+'BN_running_mean'
+        var_name   = W_name.replace('W','').replace('__','_')+'BN_running_var'
         mean_init  = np.zeros((W_shape[1],), dtype=config.floatX)
         var_init   = np.ones((W_shape[1],),  dtype=config.floatX)
         self._addWeights(mean_name, mean_init, borrow=True)
         self._addWeights(var_name,  var_init, borrow=True)
-        momentum,eps= 0.9, 1e-6
+        #momentum set to 0 in first iteration
+        self._addWeights('BN_momentum', np.asarray(0.,dtype=config.floatX), borrow=True)
         lin = T.dot(inp,W)+b
         if convolution:
             assert False,'Not implemented'
         else:
-            if validation:
+            if evaluation:
                 normalized = (lin-self.tWeights[mean_name])/T.sqrt(self.tWeights[var_name]+eps)
                 bn_lin     = self.tWeights[gamma_name]*normalized + self.tWeights[beta_name]
             else:
@@ -417,19 +430,51 @@ class BaseModel:
                     cur_mean   = lin.mean((0,1))
                     cur_var    = lin.var((0,1))
                 else:
-                    assert False,'No support for tensors greater than 4D'
+                    assert False,'No support for tensors greater than 3D'
                 normalized     = (lin-cur_mean) / T.sqrt(cur_var+eps)
                 bn_lin         = self.tWeights[gamma_name]*normalized + self.tWeights[beta_name]
-                self.updates.append((self.tWeights[mean_name], momentum * self.tWeights[mean_name] + (1.0-momentum) * cur_mean))
-                self.updates.append((self.tWeights[var_name],  momentum * self.tWeights[var_name] + (1.0-momentum) * (float(W_shape[0])/float(W_shape[0]-1))* cur_var))
-                #Add to the computational flow graph during training
-                bn_lin    += 0.*(self.tWeights[mean_name].sum()+self.tWeights[var_name].sum())
+                #Update running stats
+                self._addUpdate(self.tWeights[mean_name], self.tWeights['BN_momentum'] * self.tWeights[mean_name] + (1.0-self.tWeights['BN_momentum']) * cur_mean)
+                self._addUpdate(self.tWeights[var_name],  self.tWeights['BN_momentum'] * self.tWeights[var_name] + (1.0-self.tWeights['BN_momentum']) * (float(W_shape[0])/float(W_shape[0]-1))* cur_var)
+                #momentum will be 0 in the first iteration
+                self._addUpdate(self.tWeights['BN_momentum'],momentum)
         #Elementwise nonlinearity
         lin_out = bn_lin
         if onlyLinear:
             return lin_out
         else:
             return self._applyNL(lin_out)
+
+    def _LayerNorm(self, W, b, inp, onlyLinear=False, eps=1e-6):
+        """
+                               Layer Normalization 
+        Implementation of https://arxiv.org/abs/1607.06450
+        a) First perform linear transformation T.dot(inp,W)+b
+        b) W must have at least 2 dimensions
+        c) Create gain & bias, create updates for gain & bias
+        """
+        W_name     = W.name
+        W_shape    = self.npWeights[W_name].shape
+        ndims = len(W_shape)
+        assert ndims>=2,'Expecting W to have at least 2 dimensions'
+        gain_init = np.ones(tuple(W_shape[1:]),dtype=config.floatX)
+        bias_init  = np.zeros(tuple(W_shape[1:]),dtype=config.floatX)
+        gain_name = W_name+'_LayerNorm_gain'
+        bias_name  = W_name+'_LayerNorm_bias'
+        self._addWeights(gain_name, gain_init, borrow=True)
+        self._addWeights(bias_name,  bias_init,  borrow=True)
+        gain = self.tWeights[gain_name]
+        bias = self.tWeights[bias_name]
+        #layer norm transformation
+        lin = T.dot(inp,W)+b
+        mean = lin.mean(tuple(range(1,ndims)),keepdims=True)
+        var = lin.var(tuple(range(1,ndims)),keepdims=True)
+        normalized = (lin-mean) / T.sqrt(var+eps)
+        LN_output = gain*normalized + bias
+        if onlyLinear:
+            return LN_output 
+        else:
+            return self._applyNL(LN_output)
 
     def _LinearNL(self, W, b, inp, onlyLinear=False):
         """
