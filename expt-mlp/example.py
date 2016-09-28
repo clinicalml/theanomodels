@@ -12,7 +12,7 @@ run_flags=['--savedir=%s'%savedir,
            '--epochs=50',
            '--savefreq=50',
            '--evalfreq=1',
-           '--nonlinearity=relu',
+           '--nonlinearity=sigmoid',
            '--nlayers=2',
            '--dim_hidden=1000',
            '--init_scheme=normal',
@@ -23,7 +23,7 @@ run_flags=['--savedir=%s'%savedir,
            ]
 
 # grid of parameters settings
-batchsizes = [4,128]
+batchsizes = [5,100]
 normalizations = [None,'batchnorm','layernorm']
 seeds = range(1,2)
 
