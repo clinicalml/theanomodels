@@ -1,8 +1,8 @@
 import os
 
 exptdir = 'example'
-script = 'expt-mlp/train_mlp_mnist.py'
-outputdir = 'expt-mlp/output'
+script = 'train_mlp_mnist.py'
+outputdir = 'output'
 session = exptdir
 savedir = os.path.join(outputdir,exptdir)
 gpu = 0 #gpu selector
