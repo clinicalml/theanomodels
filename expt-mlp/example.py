@@ -9,8 +9,8 @@ gpu = 0 #gpu selector
 
 theano_flags='device=gpu{gpuid}'
 run_flags=['--savedir=%s'%savedir,
-           '--epochs=20',
-           '--savefreq=20',
+           '--epochs=50',
+           '--savefreq=50',
            '--evalfreq=1',
            '--nonlinearity=relu',
            '--nlayers=2',
