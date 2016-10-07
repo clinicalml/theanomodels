@@ -23,7 +23,7 @@ def saveSparseHDF5(matrix, prefix, fname):
         val = matrix.__class__.__name__
         f.attrs[key] = np.string_(val)
 
-def loadSparseHDF5(prefix, fname):
+def loadSparseHDF5(prefix, fname, changeval = None):
     """ Load from matrix """
     params= []
     data  = None
@@ -33,6 +33,8 @@ def loadSparseHDF5(prefix, fname):
             params.append(f[key].value)
         key = prefix+'_type'
         dtype=f.attrs[key]
+        if changeval is not None:
+            params[0] = params[0]*0.+changeval
         if dtype=='csc_matrix':
             data = csc_matrix(tuple(params[:3]),shape=params[3])
         elif dtype=='csr_matrix':

@@ -7,12 +7,14 @@ def readPickle(fname, nobjects =1):
     with open(fname,'rb') as f:
         for n in range(nobjects):
             obj.append(pickle.load(f))
+    print 'Read ',len(obj),' objects'
     return obj
 
 def savePickle(list_of_objects, fname):
     with open(fname,'wb') as f:
         for obj in list_of_objects:
             pickle.dump(obj, f)
+    print 'Saved ',len(list_of_objects),' objects'
 
 def removeIfExists(fname):
     if os.path.exists(fname):
