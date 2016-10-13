@@ -78,5 +78,5 @@ See expt-bmnist for details on setting up an experiment.
 
 
 ## Contributors
-Rahul G. Krishnan (rahul@cs.nyu.edu)
-Justin Mao-Jones
+* Rahul G. Krishnan (rahul@cs.nyu.edu)
+* Justin Mao-Jones
