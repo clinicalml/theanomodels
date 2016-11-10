@@ -32,11 +32,18 @@ def mapPrint(title, hmap, nlFreq=1):
             print '\n',
     print '\n}'
 
+def saveDataHDF5(file,key,savedata):
+    if isinstance(savedata,dict):
+        grp = file.create_group(key)
+        for k,v in savedata.iteritems():
+            saveDataHDF5(grp,k,v)
+    else:
+        file.create_dataset(key,data=savedata)
+
 def saveHDF5(fname, savedata):
-    ff = h5py.File(fname,mode='w')
-    for k in savedata:
-        ff.create_dataset(k, data=savedata[k])
-    ff.close()
+    with h5py.File(fname,mode='w') as ff:
+        for k in savedata:
+            saveDataHDF5(ff,k,savedata[k])
 
 def displayTime(event, start, end, reportingIn='seconds'):
     time_taken = end-start
@@ -52,14 +59,18 @@ def getPYDIR():
             return k.split('theanomodels')[0]+'theanomodels'
     assert False,'Should not reach here, directory <theanomodels> expected in PYTHONPATH.'
 
+def loadDataHDF5(data):
+    if isinstance(data,h5py.File) or isinstance(data,h5py.Group):
+        return {k:loadDataHDF5(v) for k,v in data.iteritems()}
+    elif isinstance(data,h5py.Dataset):
+        return data.value
+    else:
+        print 'unhandled datatype: %s' % type(data)
+
 def loadHDF5(fname):
     assert os.path.exists(fname),'File not found'
-    fhandle = h5py.File(fname,mode='r')
-    results = {}
-    for k in fhandle.keys():
-        results[k] = fhandle[k].value
-    fhandle.close()
-    return results
+    with h5py.File(fname,'r') as f:
+        return loadDataHDF5(f)
 
 def getLowestError(mat):
     """ 
