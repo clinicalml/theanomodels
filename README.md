@@ -19,9 +19,9 @@ this package defines a base model that can be inherited from.
 The wrapper can be trivially extended to include more complex functionality depending on the project.
 
 ## Installation
-Clone this repository to /path/to/theanomodels and then append the following to your ~/.profile or ~/.bashrc file
+Clone this repository to your the root of your project directory.  Import using:
 ```
-export PYTHONPATH=$PYTHONPATH:/path/to/theanomodels
+import theanomodels
 ```
 
 ## Defining a Model

@@ -1,7 +1,7 @@
 import os,time
-from datasets.load import loadDataset
-from utils.parse_args_lstm import params 
-from utils.misc import removeIfExists,createIfAbsent,mapPrint,saveHDF5,displayTime
+from ..datasets.load import loadDataset
+from ..utils.parse_args_lstm import params 
+from ..utils.misc import removeIfExists,createIfAbsent,mapPrint,saveHDF5,displayTime
 
 if params['dataset']=='':
     params['dataset']='jsb'

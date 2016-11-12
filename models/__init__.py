@@ -11,7 +11,7 @@ theano.config.compute_test_value = 'warn'
 from theano.printing import pydotprint
 import theano.tensor as T
 from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
-from utils.optimizer import adam,rmsprop
+from ..utils.optimizer import adam,rmsprop
 from theano.tensor.nnet.bn import batch_normalization
 
 class BaseModel:
