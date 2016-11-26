@@ -150,7 +150,7 @@ def _processSynthetic(dset):
         return Z_true, X
     if not np.all([os.path.exists(os.path.join(syntheticDIR,fname+'.h5')) for fname in ['synthetic'+str(i) for i in range(9,13)]]):
         #Create all datasets
-        for s in range(9,12):
+        for s in range(9,13):
             print 'Creating: ',s
             dataset = {}
             transition_fxn = params_synthetic['synthetic'+str(s)]['trans_fxn']
@@ -186,3 +186,4 @@ if __name__=='__main__':
     _processBinarizedMNIST()
     _processPolyphonic('jsb')
     _processSynthetic('synthetic11')
+    _processSynthetic('synthetic12')

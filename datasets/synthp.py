@@ -74,3 +74,39 @@ params_synthetic['synthetic11']['init_mu']     = 0.
 params_synthetic['synthetic11']['init_cov']    = 0.01 
 params_synthetic['synthetic11']['baseline']    = 'None' 
 params_synthetic['synthetic11']['docstr']      = '$z_t\sim\mathcal{N}([0.2z_{t-1}^0+\\text{tanh}(\\alpha z_{t-1}^1); 0.2z_{t-1}^1+\\sin(\\beta z_{t-1}^0)] ,'+str(params_synthetic['synthetic11']['trans_cov'])+')$\n$x_t\sim\mathcal{N}(0.5z_t,'+str(params_synthetic['synthetic11']['obs_cov'])+')$'
+
+
+def nlinear_trans_learn_2(z, fxn_params = {}, ns=None): 
+    assert z.ndim == 3,'expecting 3d'
+    assert z.shape[2]== 2,'expecting 2 dim'
+    z_1 = z[:,:,[0]]
+    z_2 = z[:,:,[1]]
+    f_1 = 0.2*z_1+np.tanh(fxn_params['alpha']*z_2)
+    f_2 = 0.2*z_2+np.sin(fxn_params['beta']*z_1)
+    return np.concatenate([f_1,f_2],axis=2)
+def obs_learn_2(z,fxn_params = {}, ns = None):
+    assert z.ndim == 3,'expecting 3d'
+    z_1 = z[:,:,[0]]
+    z_2 = z[:,:,[1]]
+    f_1 = 0.1*(z_2+z_1**2)
+    f_2 = 0.1*(z_1+z_2**2)
+    return np.concatenate([f_1,f_2],axis=2)
+    #[0.1(z_{t}^1+z_t^0.z_t^0);0.1*(z_{t}^0+z_t^1.z_t^1)]
+params_synthetic['synthetic12']                = {}
+params_synthetic['synthetic12']['params']      = {}
+params_synthetic['synthetic12']['params']['alpha']  = 0.5
+params_synthetic['synthetic12']['params']['beta']   = -0.1
+params_synthetic['synthetic12']['trans_fxn']   = nlinear_trans_learn_2
+params_synthetic['synthetic12']['obs_fxn']     = obs_learn_2
+params_synthetic['synthetic12']['dim_obs']     = 2
+params_synthetic['synthetic12']['dim_stoc']    = 2
+params_synthetic['synthetic12']['trans_cov']   = 1. 
+params_synthetic['synthetic12']['trans_drift'] = 0.
+params_synthetic['synthetic12']['trans_mult']  = 1.
+params_synthetic['synthetic12']['obs_cov']     = 1. 
+params_synthetic['synthetic12']['obs_drift']   = 0. 
+params_synthetic['synthetic12']['obs_mult']    = 0.5 
+params_synthetic['synthetic12']['init_mu']     = 0.
+params_synthetic['synthetic12']['init_cov']    = 0.01 
+params_synthetic['synthetic12']['baseline']    = 'None' 
+params_synthetic['synthetic12']['docstr']      = '$z_t\sim\mathcal{N}([0.2z_{t-1}^0+\\text{tanh}(\\alpha z_{t-1}^1); 0.2z_{t-1}^1+\\sin(\\beta z_{t-1}^0)] ,'+str(params_synthetic['synthetic11']['trans_cov'])+')$\n$x_t\sim\mathcal{N}([0.1(z_{t}^1+z_t^0.z_t^0);0.1*(z_{t}^0+z_t^1.z_t^1),'+str(params_synthetic['synthetic11']['obs_cov'])+')$'
