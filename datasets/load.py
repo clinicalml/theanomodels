@@ -157,9 +157,7 @@ def _polyphonic(dset):
     return datasets
 
 def _synthetic(dset):
-    """
-    Utility functino to process and load synthetic datasets
-    """
+    """ Utility functino to process and load synthetic datasets """
     pfile = process._processSynthetic(dset)
     ff = h5py.File(pfile,mode='r')
     datasets = {}

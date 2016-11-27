@@ -127,7 +127,17 @@ def _processSynthetic(dset):
     if not os.path.exists(syntheticDIR):
         os.mkdir(syntheticDIR)
     fname = syntheticDIR+'/'+dset+'.h5'
-    assert dset in ['synthetic9','synthetic10','synthetic11','synthetic12'] ,'Only synthetic 9/10/11 supported'
+    assert dset in ['synthetic9','synthetic10','synthetic11','synthetic12','synthetic13','synthetic14'] ,'Only synthetic 9/10/11 supported'
+    """
+    9: linear    ds = 1
+    10:nonlinear ds = 1
+    11:nonlinear ds = 2 [param estimation]
+
+    Checking scalability of ST-R
+    12:linear    ds = 10
+    13:linear    ds = 100
+    14:linear    ds = 250
+    """
     if os.path.exists(fname):
         print 'Found: ',fname
         return fname
@@ -150,7 +160,7 @@ def _processSynthetic(dset):
         return Z_true, X
     if not np.all([os.path.exists(os.path.join(syntheticDIR,fname+'.h5')) for fname in ['synthetic'+str(i) for i in range(9,13)]]):
         #Create all datasets
-        for s in range(9,13):
+        for s in range(12,15):
             print 'Creating: ',s
             dataset = {}
             transition_fxn = params_synthetic['synthetic'+str(s)]['trans_fxn']
@@ -161,9 +171,14 @@ def _processSynthetic(dset):
             obs_cov        = params_synthetic['synthetic'+str(s)]['obs_cov']
             model_params   = params_synthetic['synthetic'+str(s)]['params']
             dim_obs, dim_stoc = params_synthetic['synthetic'+str(s)]['dim_obs'],params_synthetic['synthetic'+str(s)]['dim_stoc']
-            Ntrain = 5000
-            Ttrain = 25 
-            Ttest  = 50
+            if s in [12,13,14]: 
+                Ntrain = 1000
+                Ttrain = 25 
+                Ttest  = 25
+            else:
+                Ntrain = 5000
+                Ttrain = 25 
+                Ttest  = 50
             Nvalid = 500
             Ntest  = 500
             train_Z, train_dataset  = createDataset(Ntrain, Ttrain, transition_fxn, emission_fxn, init_mu, init_cov, trans_cov, obs_cov, model_params, dim_stoc, dim_obs) 
