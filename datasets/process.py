@@ -144,7 +144,7 @@ def _processSynthetic(dset):
     #Setup polyphonic datasets from scratch
     np.random.seed(1)
     def sampleGaussian(mu, cov):
-        assert type(cov) is float or type(cov) is np.array,'invalid type: '+str(cov)+' type: '+str(type(cov))
+        assert type(cov) is float or type(cov) is np.ndarray,'invalid type: '+str(cov)+' type: '+str(type(cov))
         return mu + np.random.randn(*mu.shape)*np.sqrt(cov)
     def createDataset(N, T, t_fxn, e_fxn, init_mu, init_cov, trans_cov, obs_cov, model_params, dim_stochastic, dim_obs):
         all_z = []
@@ -158,9 +158,9 @@ def _processSynthetic(dset):
         X     = sampleGaussian(e_fxn(Z_true, fxn_params = model_params), obs_cov)
         assert X.shape[2]==dim_obs,'Shape mismatch'
         return Z_true, X
-    if not np.all([os.path.exists(os.path.join(syntheticDIR,fname+'.h5')) for fname in ['synthetic'+str(i) for i in range(9,13)]]):
+    if not np.all([os.path.exists(os.path.join(syntheticDIR,fname+'.h5')) for fname in ['synthetic'+str(i) for i in range(9,15)]]):
         #Create all datasets
-        for s in range(12,15):
+        for s in range(9,15):
             print 'Creating: ',s
             dataset = {}
             transition_fxn = params_synthetic['synthetic'+str(s)]['trans_fxn']
@@ -201,4 +201,4 @@ if __name__=='__main__':
     _processBinarizedMNIST()
     _processPolyphonic('jsb')
     _processSynthetic('synthetic11')
-    _processSynthetic('synthetic12')
+    _processSynthetic('synthetic14')
