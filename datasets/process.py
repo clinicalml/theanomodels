@@ -137,12 +137,21 @@ def _processSynthetic(dset):
     12:linear    ds = 10
     13:linear    ds = 100
     14:linear    ds = 250
+
+    Checking scalability of ST-R - dimz = dimobs
+    15:linear    ds = 10
+    16:linear    ds = 100
+    17:linear    ds = 250
+
+    Checking scalability of ST-R - dimz = dimobs and diagonal weight matrices
+    18:linear    ds = 10
+    19:linear    ds = 100
+    20:linear    ds = 250
     """
     if os.path.exists(fname):
         print 'Found: ',fname
         return fname
-    #Setup polyphonic datasets from scratch
-    np.random.seed(1)
+    #Old=np.random.seed(1)
     def sampleGaussian(mu, cov):
         assert type(cov) is float or type(cov) is np.ndarray,'invalid type: '+str(cov)+' type: '+str(type(cov))
         return mu + np.random.randn(*mu.shape)*np.sqrt(cov)
@@ -158,9 +167,12 @@ def _processSynthetic(dset):
         X     = sampleGaussian(e_fxn(Z_true, fxn_params = model_params), obs_cov)
         assert X.shape[2]==dim_obs,'Shape mismatch'
         return Z_true, X
-    if not np.all([os.path.exists(os.path.join(syntheticDIR,fname+'.h5')) for fname in ['synthetic'+str(i) for i in range(9,15)]]):
+    if not np.all([os.path.exists(os.path.join(syntheticDIR,fname+'.h5')) for fname in ['synthetic'+str(i) for i in range(9,21)]]):
         #Create all datasets
-        for s in range(9,15):
+        for s in range(9,21):
+            if os.path.exists(os.path.join(syntheticDIR,'synthetic'+str(s)+'.h5')):
+                print 'Found ',s
+                continue
             print 'Creating: ',s
             dataset = {}
             transition_fxn = params_synthetic['synthetic'+str(s)]['trans_fxn']
@@ -171,7 +183,7 @@ def _processSynthetic(dset):
             obs_cov        = params_synthetic['synthetic'+str(s)]['obs_cov']
             model_params   = params_synthetic['synthetic'+str(s)]['params']
             dim_obs, dim_stoc = params_synthetic['synthetic'+str(s)]['dim_obs'],params_synthetic['synthetic'+str(s)]['dim_stoc']
-            if s in [12,13,14]: 
+            if s in [12,13,14,15,16,17,18,19,20]: 
                 Ntrain = 1000
                 Ttrain = 25 
                 Ttest  = 25
@@ -181,6 +193,8 @@ def _processSynthetic(dset):
                 Ttest  = 50
             Nvalid = 500
             Ntest  = 500
+            #New-
+            np.random.seed(1)
             train_Z, train_dataset  = createDataset(Ntrain, Ttrain, transition_fxn, emission_fxn, init_mu, init_cov, trans_cov, obs_cov, model_params, dim_stoc, dim_obs) 
             valid_Z, valid_dataset  = createDataset(Nvalid, Ttrain, transition_fxn, emission_fxn, init_mu, init_cov, trans_cov, obs_cov, model_params, dim_stoc, dim_obs) 
             test_Z,  test_dataset   = createDataset(Ntest, Ttest, transition_fxn, emission_fxn, init_mu, init_cov, trans_cov, obs_cov, model_params, dim_stoc, dim_obs) 
@@ -202,3 +216,4 @@ if __name__=='__main__':
     _processPolyphonic('jsb')
     _processSynthetic('synthetic11')
     _processSynthetic('synthetic14')
+    _processSynthetic('synthetic20')

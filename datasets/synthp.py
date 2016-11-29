@@ -96,20 +96,54 @@ if not os.path.exists(SAVEDIR+'/linear-matrices.h5'):
     print 'Creating linear matrices'
     linmat = {}
     np.random.seed(0)
-    linmat['Wtrans_10']  = np.random.randn(10,10)
-    linmat['Wtrans_100'] = np.random.randn(100,100)
-    linmat['Wtrans_250'] = np.random.randn(250,250)
-    linmat['btrans_10']  = np.random.randn(10,)
-    linmat['btrans_100'] = np.random.randn(100,)
-    linmat['btrans_250'] = np.random.randn(250,)
-    linmat['Wobs_10']  = np.random.randn(10,20)
-    linmat['Wobs_100'] = np.random.randn(100,200)
-    linmat['Wobs_250'] = np.random.randn(250,500)
+    linmat['Wtrans_10']  = np.random.randn(10,10)*0.05
+    linmat['Wtrans_100'] = np.random.randn(100,100)*0.05
+    linmat['Wtrans_250'] = np.random.randn(250,250)*0.05
+    linmat['btrans_10']  = np.random.randn(10,)*0.05
+    linmat['btrans_100'] = np.random.randn(100,)*0.05
+    linmat['btrans_250'] = np.random.randn(250,)*0.05
+    linmat['Wobs_10']  = np.random.randn(10,20)*0.05
+    linmat['Wobs_100'] = np.random.randn(100,200)*0.05
+    linmat['Wobs_250'] = np.random.randn(250,500)*0.05
     saveHDF5(SAVEDIR+'/linear-matrices.h5',linmat)
     saved_matrices = linmat
 else:
     print 'Loading linear matrices'
     saved_matrices = loadHDF5(SAVEDIR+'/linear-matrices.h5')
+
+if not os.path.exists(SAVEDIR+'/linear-matrices-2.h5'):
+    os.system('mkdir -p '+SAVEDIR)
+    print 'Creating linear matrices'
+    linmat = {}
+    np.random.seed(0)
+    linmat['Wtrans_10']  = np.random.randn(10,10)*0.05
+    linmat['Wtrans_100'] = np.random.randn(100,100)*0.05
+    linmat['Wtrans_250'] = np.random.randn(250,250)*0.05
+    linmat['btrans_10']  = np.random.randn(10,)*0.05
+    linmat['btrans_100'] = np.random.randn(100,)*0.05
+    linmat['btrans_250'] = np.random.randn(250,)*0.05
+    linmat['Wobs_10']  = np.random.randn(10,10)*0.05
+    linmat['Wobs_100'] = np.random.randn(100,100)*0.05
+    linmat['Wobs_250'] = np.random.randn(250,250)*0.05
+    #Diagonal
+    def setupMatrices(dim, mult=0.05):
+        di  = np.diag_indices(dim)
+        bt  = np.random.randn(dim,)*mult
+        Wt  = np.zeros((dim,dim))
+        Wt[di] = np.random.randn(dim,)*mult
+        We  = np.zeros((dim,dim))
+        We[di] = np.random.randn(dim,)*mult
+        return Wt,bt,We
+    linmat['Wtrans_10_diag'], linmat['btrans_10_diag'], linmat['Wobs_10_diag']  = setupMatrices(10)
+    linmat['Wtrans_100_diag'],linmat['btrans_100_diag'],linmat['Wobs_100_diag'] = setupMatrices(100)
+    linmat['Wtrans_250_diag'],linmat['btrans_250_diag'],linmat['Wobs_250_diag'] = setupMatrices(250)
+    #Check that this works
+    import ipdb;ipdb.set_trace()
+    saveHDF5(SAVEDIR+'/linear-matrices-2.h5',linmat)
+    saved_matrices_2= linmat
+else:
+    print 'Loading linear matrices'
+    saved_matrices_2= loadHDF5(SAVEDIR+'/linear-matrices-2.h5')
 
 params_synthetic['synthetic12'] = {}
 params_synthetic['synthetic12']['dim_obs']     = 20
@@ -137,16 +171,12 @@ params_synthetic['synthetic12']['trans_fxn']   = linear_trans_s12
 params_synthetic['synthetic12']['obs_fxn']     = linear_obs_s12
 params_synthetic['synthetic12']['init_mu']     = np.ones((10,))*0.
 
-params_synthetic['synthetic12']['init_cov']    = 1.
+params_synthetic['synthetic12']['init_cov']    = 0.1
 params_synthetic['synthetic12']['init_cov_full']    = np.zeros((10,10))
-np.fill_diagonal(params_synthetic['synthetic12']['init_cov_full'],1.)
+np.fill_diagonal(params_synthetic['synthetic12']['init_cov_full'],0.1)
 
 params_synthetic['synthetic12']['baseline']    = 'KF' 
 params_synthetic['synthetic12']['docstr']      = '$z_t\sim\mathcal{N}(W_tz_{t-1}+b_t,10)$\n$x_t\sim\mathcal{N}(W_oz_t,20)$'
-
-
-
-
 
 
 
@@ -176,14 +206,12 @@ params_synthetic['synthetic13']['trans_fxn']   = linear_trans_s13
 params_synthetic['synthetic13']['obs_fxn']     = linear_obs_s13
 params_synthetic['synthetic13']['init_mu']     = np.ones((100,))*0.
 
-params_synthetic['synthetic13']['init_cov']    = 1.
+params_synthetic['synthetic13']['init_cov']    = 0.1
 params_synthetic['synthetic13']['init_cov_full']  = np.zeros((100,100))
-np.fill_diagonal(params_synthetic['synthetic13']['init_cov_full'],1.)
+np.fill_diagonal(params_synthetic['synthetic13']['init_cov_full'],0.1)
 
 params_synthetic['synthetic13']['baseline']    = 'KF' 
 params_synthetic['synthetic13']['docstr']      = '$z_t\sim\mathcal{N}(W_tz_{t-1}+b_t,10)$\n$x_t\sim\mathcal{N}(W_oz_t,20)$'
-
-
 
 
 params_synthetic['synthetic14'] = {}
@@ -212,9 +240,213 @@ params_synthetic['synthetic14']['trans_fxn']   = linear_trans_s14
 params_synthetic['synthetic14']['obs_fxn']     = linear_obs_s14
 params_synthetic['synthetic14']['init_mu']     = np.ones((250,))*0.
 
-params_synthetic['synthetic14']['init_cov']    = 1.
+params_synthetic['synthetic14']['init_cov']    = 0.1
 params_synthetic['synthetic14']['init_cov_full']    = np.zeros((250,250))
-np.fill_diagonal(params_synthetic['synthetic14']['init_cov_full'],1.)
+np.fill_diagonal(params_synthetic['synthetic14']['init_cov_full'],0.1)
 
 params_synthetic['synthetic14']['baseline']    = 'KF' 
 params_synthetic['synthetic14']['docstr']      = '$z_t\sim\mathcal{N}(W_tz_{t-1}+b_t,10)$\n$x_t\sim\mathcal{N}(W_oz_t,20)$'
+
+"""
+Dimobs and Dimz are the same
+"""
+params_synthetic['synthetic15'] = {}
+params_synthetic['synthetic15']['dim_obs']     = 10
+params_synthetic['synthetic15']['dim_stoc']    = 10
+params_synthetic['synthetic15']['params']      = {}
+
+params_synthetic['synthetic15']['trans_cov']   = 1.
+params_synthetic['synthetic15']['trans_cov_full']   = np.zeros((10,10))
+np.fill_diagonal(params_synthetic['synthetic15']['trans_cov_full'], 1.)
+
+params_synthetic['synthetic15']['trans_drift'] = saved_matrices_2['btrans_10'] 
+params_synthetic['synthetic15']['trans_mult']  = saved_matrices_2['Wtrans_10']
+
+params_synthetic['synthetic15']['obs_cov']     = 10.
+params_synthetic['synthetic15']['obs_cov_full']= np.zeros((10,10))
+np.fill_diagonal(params_synthetic['synthetic15']['obs_cov_full'], 10.)
+
+params_synthetic['synthetic15']['obs_drift']   = np.ones((10,))*0. 
+params_synthetic['synthetic15']['obs_mult']    = saved_matrices_2['Wobs_10'] 
+def linear_trans_s15(z,fxn_params = {},ns=None): 
+    return np.dot(z,saved_matrices_2['Wtrans_10'])+saved_matrices_2['btrans_10']
+def linear_obs_s15(z,fxn_params = {},ns=None): 
+    return np.dot(z,saved_matrices_2['Wobs_10'])
+params_synthetic['synthetic15']['trans_fxn']   = linear_trans_s15
+params_synthetic['synthetic15']['obs_fxn']     = linear_obs_s15
+params_synthetic['synthetic15']['init_mu']     = np.ones((10,))*0.
+
+params_synthetic['synthetic15']['init_cov']    = 0.1
+params_synthetic['synthetic15']['init_cov_full']    = np.zeros((10,10))
+np.fill_diagonal(params_synthetic['synthetic15']['init_cov_full'],0.1)
+
+params_synthetic['synthetic15']['baseline']    = 'KF' 
+params_synthetic['synthetic15']['docstr']      = '$z_t\sim\mathcal{N}(W_tz_{t-1}+b_t,10)$\n$x_t\sim\mathcal{N}(W_oz_t,20)$'
+
+
+params_synthetic['synthetic16'] = {}
+params_synthetic['synthetic16']['dim_obs']     = 100
+params_synthetic['synthetic16']['dim_stoc']    = 100
+params_synthetic['synthetic16']['params']      = {}
+
+params_synthetic['synthetic16']['trans_cov']   = 1.
+params_synthetic['synthetic16']['trans_cov_full']   = np.zeros((100,100))
+np.fill_diagonal(params_synthetic['synthetic16']['trans_cov_full'],1.)
+
+params_synthetic['synthetic16']['trans_drift'] = saved_matrices_2['btrans_100'] 
+params_synthetic['synthetic16']['trans_mult']  = saved_matrices_2['Wtrans_100']
+
+params_synthetic['synthetic16']['obs_cov']     = 10.
+params_synthetic['synthetic16']['obs_cov_full']= np.zeros((100,100))
+np.fill_diagonal(params_synthetic['synthetic16']['obs_cov_full'],10.)
+
+params_synthetic['synthetic16']['obs_drift']   = np.ones((100,))*0. 
+params_synthetic['synthetic16']['obs_mult']    = saved_matrices_2['Wobs_100']
+def linear_trans_s16(z,fxn_params = {},ns=None): 
+    return np.dot(z,saved_matrices_2['Wtrans_100'])+saved_matrices_2['btrans_100']
+def linear_obs_s16(z,fxn_params = {},ns=None): 
+    return np.dot(z,saved_matrices_2['Wobs_100'])
+params_synthetic['synthetic16']['trans_fxn']   = linear_trans_s16
+params_synthetic['synthetic16']['obs_fxn']     = linear_obs_s16
+params_synthetic['synthetic16']['init_mu']     = np.ones((100,))*0.
+
+params_synthetic['synthetic16']['init_cov']    = 0.1
+params_synthetic['synthetic16']['init_cov_full']  = np.zeros((100,100))
+np.fill_diagonal(params_synthetic['synthetic16']['init_cov_full'],0.1)
+
+params_synthetic['synthetic16']['baseline']    = 'KF' 
+params_synthetic['synthetic16']['docstr']      = '$z_t\sim\mathcal{N}(W_tz_{t-1}+b_t,10)$\n$x_t\sim\mathcal{N}(W_oz_t,20)$'
+
+params_synthetic['synthetic17'] = {}
+params_synthetic['synthetic17']['dim_obs']     = 250 
+params_synthetic['synthetic17']['dim_stoc']    = 250
+params_synthetic['synthetic17']['params']      = {}
+
+params_synthetic['synthetic17']['trans_cov']   = 1.
+params_synthetic['synthetic17']['trans_cov_full']   = np.zeros((250,250))
+np.fill_diagonal(params_synthetic['synthetic17']['trans_cov_full'],1.)
+
+params_synthetic['synthetic17']['trans_drift'] = saved_matrices_2['btrans_250'] 
+params_synthetic['synthetic17']['trans_mult']  = saved_matrices_2['Wtrans_250']
+
+params_synthetic['synthetic17']['obs_cov']     = 10.
+params_synthetic['synthetic17']['obs_cov_full']     = np.zeros((250,250))
+np.fill_diagonal(params_synthetic['synthetic17']['obs_cov_full'],10.)
+
+params_synthetic['synthetic17']['obs_drift']   = np.ones((250,))*0. 
+params_synthetic['synthetic17']['obs_mult']    = saved_matrices_2['Wobs_250']
+def linear_trans_s17(z,fxn_params = {},ns=None): 
+    return np.dot(z,saved_matrices_2['Wtrans_250'])+saved_matrices_2['btrans_250']
+def linear_obs_s17(z,fxn_params = {},ns=None): 
+    return np.dot(z,saved_matrices_2['Wobs_250'])
+params_synthetic['synthetic17']['trans_fxn']   = linear_trans_s17
+params_synthetic['synthetic17']['obs_fxn']     = linear_obs_s17
+params_synthetic['synthetic17']['init_mu']     = np.ones((250,))*0.
+params_synthetic['synthetic17']['init_cov']    = 0.1
+params_synthetic['synthetic17']['init_cov_full']    = np.zeros((250,250))
+np.fill_diagonal(params_synthetic['synthetic17']['init_cov_full'],0.1)
+params_synthetic['synthetic17']['baseline']    = 'KF' 
+params_synthetic['synthetic17']['docstr']      = '$z_t\sim\mathcal{N}(W_tz_{t-1}+b_t,10)$\n$x_t\sim\mathcal{N}(W_oz_t,20)$'
+
+
+"""
+dimz and dimobs are the same with diagonal 
+"""
+
+params_synthetic['synthetic18'] = {}
+params_synthetic['synthetic18']['dim_obs']     = 10
+params_synthetic['synthetic18']['dim_stoc']    = 10
+params_synthetic['synthetic18']['params']      = {}
+
+params_synthetic['synthetic18']['trans_cov']   = 1.
+params_synthetic['synthetic18']['trans_cov_full']   = np.zeros((10,10))
+np.fill_diagonal(params_synthetic['synthetic18']['trans_cov_full'], 1.)
+
+params_synthetic['synthetic18']['trans_drift'] = saved_matrices_2['btrans_10_diag'] 
+params_synthetic['synthetic18']['trans_mult']  = saved_matrices_2['Wtrans_10_diag']
+
+params_synthetic['synthetic18']['obs_cov']     = 10.
+params_synthetic['synthetic18']['obs_cov_full']= np.zeros((10,10))
+np.fill_diagonal(params_synthetic['synthetic18']['obs_cov_full'], 10.)
+
+params_synthetic['synthetic18']['obs_drift']   = np.ones((10,))*0. 
+params_synthetic['synthetic18']['obs_mult']    = saved_matrices_2['Wobs_10_diag'] 
+def linear_trans_s18(z,fxn_params = {},ns=None): 
+    return np.dot(z,saved_matrices_2['Wtrans_10_diag'])+saved_matrices_2['btrans_10_diag']
+def linear_obs_s18(z,fxn_params = {},ns=None): 
+    return np.dot(z,saved_matrices_2['Wobs_10_diag'])
+params_synthetic['synthetic18']['trans_fxn']   = linear_trans_s18
+params_synthetic['synthetic18']['obs_fxn']     = linear_obs_s18
+params_synthetic['synthetic18']['init_mu']     = np.ones((10,))*0.
+
+params_synthetic['synthetic18']['init_cov']    = 0.1
+params_synthetic['synthetic18']['init_cov_full']    = np.zeros((10,10))
+np.fill_diagonal(params_synthetic['synthetic18']['init_cov_full'],0.1)
+
+params_synthetic['synthetic18']['baseline']    = 'KF' 
+params_synthetic['synthetic18']['docstr']      = '$z_t\sim\mathcal{N}(W_tz_{t-1}+b_t,10)$\n$x_t\sim\mathcal{N}(W_oz_t,20)$'
+
+
+params_synthetic['synthetic19'] = {}
+params_synthetic['synthetic19']['dim_obs']     = 100
+params_synthetic['synthetic19']['dim_stoc']    = 100
+params_synthetic['synthetic19']['params']      = {}
+
+params_synthetic['synthetic19']['trans_cov']   = 1.
+params_synthetic['synthetic19']['trans_cov_full']   = np.zeros((100,100))
+np.fill_diagonal(params_synthetic['synthetic19']['trans_cov_full'],1.)
+
+params_synthetic['synthetic19']['trans_drift'] = saved_matrices_2['btrans_100_diag'] 
+params_synthetic['synthetic19']['trans_mult']  = saved_matrices_2['Wtrans_100_diag']
+
+params_synthetic['synthetic19']['obs_cov']     = 10.
+params_synthetic['synthetic19']['obs_cov_full']= np.zeros((100,100))
+np.fill_diagonal(params_synthetic['synthetic19']['obs_cov_full'],10.)
+
+params_synthetic['synthetic19']['obs_drift']   = np.ones((100,))*0. 
+params_synthetic['synthetic19']['obs_mult']    = saved_matrices_2['Wobs_100_diag']
+def linear_trans_s19(z,fxn_params = {},ns=None): 
+    return np.dot(z,saved_matrices_2['Wtrans_100_diag'])+saved_matrices_2['btrans_100_diag']
+def linear_obs_s19(z,fxn_params = {},ns=None): 
+    return np.dot(z,saved_matrices_2['Wobs_100_diag'])
+params_synthetic['synthetic19']['trans_fxn']   = linear_trans_s19
+params_synthetic['synthetic19']['obs_fxn']     = linear_obs_s19
+params_synthetic['synthetic19']['init_mu']     = np.ones((100,))*0.
+
+params_synthetic['synthetic19']['init_cov']    = 0.1
+params_synthetic['synthetic19']['init_cov_full']  = np.zeros((100,100))
+np.fill_diagonal(params_synthetic['synthetic19']['init_cov_full'],0.1)
+
+params_synthetic['synthetic19']['baseline']    = 'KF' 
+params_synthetic['synthetic19']['docstr']      = '$z_t\sim\mathcal{N}(W_tz_{t-1}+b_t,10)$\n$x_t\sim\mathcal{N}(W_oz_t,20)$'
+
+params_synthetic['synthetic20'] = {}
+params_synthetic['synthetic20']['dim_obs']     = 250 
+params_synthetic['synthetic20']['dim_stoc']    = 250
+params_synthetic['synthetic20']['params']      = {}
+
+params_synthetic['synthetic20']['trans_cov']   = 1.
+params_synthetic['synthetic20']['trans_cov_full']   = np.zeros((250,250))
+np.fill_diagonal(params_synthetic['synthetic20']['trans_cov_full'],1.)
+
+params_synthetic['synthetic20']['trans_drift'] = saved_matrices_2['btrans_250_diag'] 
+params_synthetic['synthetic20']['trans_mult']  = saved_matrices_2['Wtrans_250_diag']
+
+params_synthetic['synthetic20']['obs_cov']     = 10.
+params_synthetic['synthetic20']['obs_cov_full']     = np.zeros((250,250))
+np.fill_diagonal(params_synthetic['synthetic20']['obs_cov_full'],10.)
+
+params_synthetic['synthetic20']['obs_drift']   = np.ones((250,))*0. 
+params_synthetic['synthetic20']['obs_mult']    = saved_matrices_2['Wobs_250_diag']
+def linear_trans_s20(z,fxn_params = {},ns=None): 
+    return np.dot(z,saved_matrices_2['Wtrans_250_diag'])+saved_matrices_2['btrans_250_diag']
+def linear_obs_s20(z,fxn_params = {},ns=None): 
+    return np.dot(z,saved_matrices_2['Wobs_250_diag'])
+params_synthetic['synthetic20']['trans_fxn']   = linear_trans_s20
+params_synthetic['synthetic20']['obs_fxn']     = linear_obs_s20
+params_synthetic['synthetic20']['init_mu']     = np.ones((250,))*0.
+params_synthetic['synthetic20']['init_cov']    = 0.1
+params_synthetic['synthetic20']['init_cov_full']    = np.zeros((250,250))
+np.fill_diagonal(params_synthetic['synthetic20']['init_cov_full'],0.1)
+params_synthetic['synthetic20']['baseline']    = 'KF' 
+params_synthetic['synthetic20']['docstr']      = '$z_t\sim\mathcal{N}(W_tz_{t-1}+b_t,10)$\n$x_t\sim\mathcal{N}(W_oz_t,20)$'
