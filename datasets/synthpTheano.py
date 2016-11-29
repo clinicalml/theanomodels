@@ -29,7 +29,10 @@ def obs_learn(z,fxn_params = {}, ns = None):
 
 #Load saved matrices and use them to form theano transition and emission functions
 SAVEDIR        = os.path.dirname(os.path.realpath(__file__))+'/synthetic'
-saved_matrices = loadHDF5(SAVEDIR+'/linear-matrices.h5')
+saved_matrices   = loadHDF5(SAVEDIR+'/linear-matrices.h5')
+saved_matrices_2 = loadHDF5(SAVEDIR+'/linear-matrices-2.h5')
+
+
 def linear_trans_s12(z,fxn_params = {},ns=None): 
     assert z.ndim==3,'Expecting 3d'
     W   = theano.shared(saved_matrices['Wtrans_10'].astype('float32'),name = 'Wtrans_10')
@@ -58,6 +61,62 @@ def linear_trans_s14(z,fxn_params = {},ns=None):
 def linear_obs_s14(z,fxn_params = {},ns=None): 
     assert z.ndim==3,'Expecting 3d'
     W   = theano.shared(saved_matrices['Wobs_250'].astype('float32'),name = 'Wobs_250')
+    return T.dot(z,W)
+
+def linear_trans_s15(z,fxn_params = {},ns=None): 
+    assert z.ndim==3,'Expecting 3d'
+    W   = theano.shared(saved_matrices_2['Wtrans_10'].astype('float32'),name = 'Wtrans_10')
+    b   = theano.shared(saved_matrices_2['btrans_10'].astype('float32'),name = 'btrans_10')
+    return T.dot(z,W)+b
+def linear_obs_s15(z,fxn_params = {},ns=None): 
+    assert z.ndim==3,'Expecting 3d'
+    W   = theano.shared(saved_matrices_2['Wobs_10'].astype('float32'),name = 'Wobs_10')
+    return T.dot(z,W)
+def linear_trans_s16(z,fxn_params = {},ns=None): 
+    assert z.ndim==3,'Expecting 3d'
+    W   = theano.shared(saved_matrices_2['Wtrans_100'].astype('float32'),name = 'Wtrans_100')
+    b   = theano.shared(saved_matrices_2['btrans_100'].astype('float32'),name = 'btrans_100')
+    return T.dot(z,W)+b
+def linear_obs_s16(z,fxn_params = {},ns=None): 
+    assert z.ndim==3,'Expecting 3d'
+    W   = theano.shared(saved_matrices_2['Wobs_100'].astype('float32'),name = 'Wobs_100')
+    return T.dot(z,W)
+def linear_trans_s17(z,fxn_params = {},ns=None): 
+    assert z.ndim==3,'Expecting 3d'
+    W   = theano.shared(saved_matrices_2['Wtrans_250'].astype('float32'),name = 'Wtrans_250')
+    b   = theano.shared(saved_matrices_2['btrans_250'].astype('float32'),name = 'btrans_250')
+    return T.dot(z,W)+b
+def linear_obs_s17(z,fxn_params = {},ns=None): 
+    assert z.ndim==3,'Expecting 3d'
+    W   = theano.shared(saved_matrices_2['Wobs_250'].astype('float32'),name = 'Wobs_250')
+    return T.dot(z,W)
+
+def linear_trans_s18(z,fxn_params = {},ns=None): 
+    assert z.ndim==3,'Expecting 3d'
+    W   = theano.shared(saved_matrices_2['Wtrans_10_diag'].astype('float32'),name = 'Wtrans_10_diag')
+    b   = theano.shared(saved_matrices_2['btrans_10_diag'].astype('float32'),name = 'btrans_10_diag')
+    return T.dot(z,W)+b
+def linear_obs_s18(z,fxn_params = {},ns=None): 
+    assert z.ndim==3,'Expecting 3d'
+    W   = theano.shared(saved_matrices_2['Wobs_10_diag'].astype('float32'),name = 'Wobs_10_diag')
+    return T.dot(z,W)
+def linear_trans_s19(z,fxn_params = {},ns=None): 
+    assert z.ndim==3,'Expecting 3d'
+    W   = theano.shared(saved_matrices_2['Wtrans_100_diag'].astype('float32'),name = 'Wtrans_100_diag')
+    b   = theano.shared(saved_matrices_2['btrans_100_diag'].astype('float32'),name = 'btrans_100_diag')
+    return T.dot(z,W)+b
+def linear_obs_s19(z,fxn_params = {},ns=None): 
+    assert z.ndim==3,'Expecting 3d'
+    W   = theano.shared(saved_matrices_2['Wobs_100_diag'].astype('float32'),name = 'Wobs_100_diag')
+    return T.dot(z,W)
+def linear_trans_s20(z,fxn_params = {},ns=None): 
+    assert z.ndim==3,'Expecting 3d'
+    W   = theano.shared(saved_matrices_2['Wtrans_250_diag'].astype('float32'),name = 'Wtrans_250_diag')
+    b   = theano.shared(saved_matrices_2['btrans_250_diag'].astype('float32'),name = 'btrans_250_diag')
+    return T.dot(z,W)+b
+def linear_obs_s20(z,fxn_params = {},ns=None): 
+    assert z.ndim==3,'Expecting 3d'
+    W   = theano.shared(saved_matrices_2['Wobs_250_diag'].astype('float32'),name = 'Wobs_250_diag')
     return T.dot(z,W)
 
 def updateParamsSynthetic(params_synthetic):
