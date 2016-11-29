@@ -127,7 +127,7 @@ def _processSynthetic(dset):
     if not os.path.exists(syntheticDIR):
         os.mkdir(syntheticDIR)
     fname = syntheticDIR+'/'+dset+'.h5'
-    assert dset in ['synthetic9','synthetic10','synthetic11','synthetic12','synthetic13','synthetic14'] ,'Only synthetic 9/10/11 supported'
+    #assert dset in ['synthetic9','synthetic10','synthetic11','synthetic12','synthetic13','synthetic14'] ,'Only synthetic 9/10/11 supported'
     """
     9: linear    ds = 1
     10:nonlinear ds = 1

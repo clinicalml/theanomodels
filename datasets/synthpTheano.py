@@ -137,3 +137,21 @@ def updateParamsSynthetic(params_synthetic):
 
     params_synthetic['synthetic14']['trans_fxn']  = linear_trans_s14
     params_synthetic['synthetic14']['obs_fxn']    = linear_obs_s14
+
+    params_synthetic['synthetic15']['trans_fxn']  = linear_trans_s15
+    params_synthetic['synthetic15']['obs_fxn']    = linear_obs_s15
+
+    params_synthetic['synthetic16']['trans_fxn']  = linear_trans_s16
+    params_synthetic['synthetic16']['obs_fxn']    = linear_obs_s16
+
+    params_synthetic['synthetic17']['trans_fxn']  = linear_trans_s17
+    params_synthetic['synthetic17']['obs_fxn']    = linear_obs_s17
+
+    params_synthetic['synthetic18']['trans_fxn']  = linear_trans_s18
+    params_synthetic['synthetic18']['obs_fxn']    = linear_obs_s18
+
+    params_synthetic['synthetic19']['trans_fxn']  = linear_trans_s19
+    params_synthetic['synthetic19']['obs_fxn']    = linear_obs_s19
+
+    params_synthetic['synthetic20']['trans_fxn']  = linear_trans_s20
+    params_synthetic['synthetic20']['obs_fxn']    = linear_obs_s20

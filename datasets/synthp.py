@@ -138,7 +138,6 @@ if not os.path.exists(SAVEDIR+'/linear-matrices-2.h5'):
     linmat['Wtrans_100_diag'],linmat['btrans_100_diag'],linmat['Wobs_100_diag'] = setupMatrices(100)
     linmat['Wtrans_250_diag'],linmat['btrans_250_diag'],linmat['Wobs_250_diag'] = setupMatrices(250)
     #Check that this works
-    import ipdb;ipdb.set_trace()
     saveHDF5(SAVEDIR+'/linear-matrices-2.h5',linmat)
     saved_matrices_2= linmat
 else:
