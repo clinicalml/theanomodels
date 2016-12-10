@@ -1,7 +1,7 @@
 import os,time
 import numpy as np
 from theanomodels.datasets.load import loadDataset
-from parse_args_mlp import params 
+from parse_args import params 
 from theanomodels.utils.misc import removeIfExists,createIfAbsent,mapPrint,saveHDF5,displayTime
 
 dataset = 'mnist'

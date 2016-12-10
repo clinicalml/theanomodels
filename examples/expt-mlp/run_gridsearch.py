@@ -1,7 +1,7 @@
 import os
 
 exptdir = 'example'
-script = 'train_mlp_mnist.py'
+script = 'train.py'
 outputdir = 'output'
 session = exptdir
 savedir = os.path.join(outputdir,exptdir)
