@@ -19,9 +19,11 @@ this package defines a base model that can be inherited from.
 The wrapper can be trivially extended to include more complex functionality depending on the project.
 
 ## Installation
-Clone this repository to your the root of your project directory.  Import using:
+Clone this repository to your the root of your project directory.  Install using pip in editable mode:
 ```
-import theanomodels
+git clone https://github.com/clinicalml/theanomodels
+cd theanomodels
+pip install -e .
 ```
 
 ## Defining a Model
