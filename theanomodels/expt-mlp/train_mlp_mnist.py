@@ -1,8 +1,8 @@
 import os,time
 import numpy as np
-from datasets.load import loadDataset
-from utils.parse_args_mlp import params 
-from utils.misc import removeIfExists,createIfAbsent,mapPrint,saveHDF5,displayTime
+from ..datasets.load import loadDataset
+from ..utils.parse_args_mlp import params 
+from ..utils.misc import removeIfExists,createIfAbsent,mapPrint,saveHDF5,displayTime
 
 dataset = 'mnist'
 params['savedir']+='-'+dataset
