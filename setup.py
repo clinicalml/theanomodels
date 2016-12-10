@@ -23,7 +23,7 @@ setup(
             'Programming Language :: Python :: 2.7',
         ],
         keywords='sample setuptools development',
-        packages=find_packages(exclude=['contrib', 'docs', 'tests']),
+        packages=find_packages(exclude=['examples','contrib', 'docs', 'tests']),
         install_requires=['Theano>=0.8.2',
                           'h5py>=2.4.0b1',
                           'numpy>=1.10.1',
