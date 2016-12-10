@@ -25,6 +25,7 @@ git clone https://github.com/clinicalml/theanomodels
 cd theanomodels
 pip install -e .
 ```
+To install locally, use `pip install -e . --user` instead.
 
 ## Defining a Model
 
