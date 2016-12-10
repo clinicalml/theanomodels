@@ -1,6 +1,6 @@
 import os,time,h5py,process
 import numpy as np
-from utils.misc import getPYDIR, readPickle
+from ..utils.misc import getPYDIR, readPickle
 import urllib,tarfile
 
 def loadDataset(dataset, **kwargs):

@@ -2,7 +2,7 @@
 import h5py,os,urllib,cPickle,gzip
 import numpy as np
 from synthp import params_synthetic
-from utils.misc import getPYDIR
+from ..utils.misc import getPYDIR
 
 def _processMNIST():
     pfile = getPYDIR()+'/datasets/mnist/proc-mnist.h5'
@@ -12,7 +12,7 @@ def _processMNIST():
     DIR = os.path.dirname(pfile)
     if not os.path.exists(DIR):
         print 'Making: ',DIR
-        os.mkdir(DIR)
+        os.makedirs(DIR)
     if not os.path.exists(os.path.join(DIR,'mnist.pkl.gz')):
         print 'Downloading data'
         urllib.urlretrieve('http://deeplearning.net/data/mnist/mnist.pkl.gz',os.path.join(DIR,'mnist.pkl.gz'))
@@ -41,7 +41,7 @@ def _processBinarizedMNIST():
     DIR = os.path.dirname(pfile)
     if not os.path.exists(DIR):
         print 'Making: ',DIR
-        os.mkdir(DIR)
+        os.makedirs(DIR)
     if not os.path.exists(os.path.join(DIR,'binarized_mnist_train.amat')):
         print 'Downloading binarized mnist'
         urllib.urlretrieve('http://www.cs.toronto.edu/~larocheh/public/datasets/binarized_mnist/binarized_mnist_train.amat',os.path.join(DIR,'binarized_mnist_train.amat'))
@@ -61,10 +61,9 @@ def _processBinarizedMNIST():
 
 def _processPolyphonic(name):
     DIR = getPYDIR()+'/datasets'
-    assert os.path.exists(DIR),'Directory does not exist: '+DIR
     polyphonicDIR = DIR+'/polyphonic/'
     if not os.path.exists(polyphonicDIR):
-        os.mkdir(polyphonicDIR)
+        os.makedirs(polyphonicDIR)
     fname = polyphonicDIR+'/'+name+'.h5'
     if os.path.exists(fname):
         print 'Found: ',fname
@@ -122,10 +121,9 @@ def _processPolyphonic(name):
 
 def _processSynthetic(dset):
     DIR = getPYDIR()+'/datasets'
-    assert os.path.exists(DIR),'Directory does not exist: '+DIR
     syntheticDIR = DIR+'/synthetic/'
     if not os.path.exists(syntheticDIR):
-        os.mkdir(syntheticDIR)
+        os.makedirs(syntheticDIR)
     fname = syntheticDIR+'/'+dset+'.h5'
     assert dset in ['synthetic9','synthetic10','synthetic11','synthetic12'] ,'Only synthetic 9/10/11 supported'
     if os.path.exists(fname):

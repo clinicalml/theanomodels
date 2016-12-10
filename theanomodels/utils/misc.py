@@ -54,10 +54,7 @@ def displayTime(event, start, end, reportingIn='seconds'):
     print '\t\t<',event,'> took ',time_taken,' ',reportingIn
 
 def getPYDIR():
-    for k in sys.path:
-        if 'theanomodels' in os.path.basename(k):
-            return k.split('theanomodels')[0]+'theanomodels'
-    assert False,'Should not reach here, directory <theanomodels> expected in PYTHONPATH.'
+    return os.getcwd()
 
 def loadDataHDF5(data):
     if isinstance(data,h5py.File) or isinstance(data,h5py.Group):

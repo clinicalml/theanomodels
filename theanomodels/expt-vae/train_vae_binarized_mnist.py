@@ -1,8 +1,8 @@
 import os,time
 import numpy as np
-from datasets.load import loadDataset
-from utils.parse_args_vae import params 
-from utils.misc import removeIfExists,createIfAbsent,mapPrint,saveHDF5,displayTime
+from ..datasets.load import loadDataset
+from ..utils.parse_args_vae import params 
+from ..utils.misc import removeIfExists,createIfAbsent,mapPrint,saveHDF5,displayTime
 
 dataset = 'binarized_mnist'
 params['savedir']+='-'+dataset
