@@ -9,9 +9,9 @@ theano.config.compute_test_value = 'warn'
 from theano.printing import pydotprint
 import theano.tensor as T
 from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
-from ..utils.optimizer import adam,rmsprop
-from ..utils.misc import saveHDF5
-from .__init__ import BaseModel
+from theanomodels.utils.optimizer import adam,rmsprop
+from theanomodels.utils.misc import saveHDF5
+from theanomodels.models import BaseModel
 
 class MLP(BaseModel, object):
     def __init__(self, params, paramFile=None, reloadFile=None):

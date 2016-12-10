@@ -30,7 +30,7 @@ parser.add_argument('-viz','--visualize_model', action='store',default = False,h
 parser.add_argument('-uid','--unique_id', action='store',default = 'uid',help='Unique Identifier',type=str)
 parser.add_argument('-seed','--seed', action='store',default = 1, help='Random Seed',type=int)
 parser.add_argument('-dir','--savedir', action='store',default = './chkpt', help='Prefix for savedir',type=str)
-parser.add_argument('-ep','--epochs', action='store',default = 50, help='MaxEpochs',type=int)
+parser.add_argument('-ep','--epochs', action='store',default = 10, help='MaxEpochs',type=int)
 parser.add_argument('-reload','--reloadFile', action='store',default = './NOSUCHFILE', help='Reload from saved model',type=str)
 parser.add_argument('-params','--paramFile', action='store',default = './NOSUCHFILE', help='Reload parameters from saved model',type=str)
 parser.add_argument('-sfreq','--savefreq', action='store',default = 1, help='Frequency of saving',type=int)

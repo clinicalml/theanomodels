@@ -1,7 +1,7 @@
 import os,time
 import numpy as np
 from theanomodels.datasets.load import loadDataset
-from theanomodels.utils.parse_args_mlp import params 
+from parse_args_mlp import params 
 from theanomodels.utils.misc import removeIfExists,createIfAbsent,mapPrint,saveHDF5,displayTime
 
 dataset = 'mnist'
@@ -16,7 +16,7 @@ mapPrint('Options: ',params)
 
 #Setup MLP Model (or reload from existing savefile)
 start_time = time.time()
-from theanomodels.models.mlp import MLP
+from mlp import MLP
 displayTime('import MLP',start_time, time.time())
 model    = None
 
