@@ -12,7 +12,10 @@ dataset = loadDataset(dataset)
 #Saving/loading
 for k in ['dim_observations','data_type']:
     params[k] = dataset[k]
-mapPrint('Options: ',params)
+
+print 'Options:'
+for k,v in sorted(params.iteritems()):
+    print '%s: %s' % (k,v)
 
 #Setup MLP Model (or reload from existing savefile)
 start_time = time.time()
