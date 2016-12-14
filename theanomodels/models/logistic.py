@@ -10,7 +10,7 @@ import theano.tensor as T
 from ..utils.misc import saveHDF5
 from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
 from ..utils.optimizer import adam,rmsprop
-from .__init__ import BaseModel
+from . import BaseModel
 from ..datasets.synthp import params_synthetic
 from ..datasets.synthpTheano import updateParamsSynthetic
 

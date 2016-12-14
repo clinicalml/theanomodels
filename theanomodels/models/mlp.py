@@ -11,7 +11,7 @@ import theano.tensor as T
 from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
 from ..utils.optimizer import adam,rmsprop
 from ..utils.misc import saveHDF5
-from .__init__ import BaseModel
+from . import BaseModel
 
 class MLP(BaseModel, object):
     def __init__(self, params, paramFile=None, reloadFile=None):

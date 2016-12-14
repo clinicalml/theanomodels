@@ -7,12 +7,12 @@ from theano import config
 theano.config.compute_test_value = 'warn'
 from theano.printing import pydotprint
 import theano.tensor as T
-from utils.misc import saveHDF5
+from ..utils.misc import saveHDF5
 from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
-from utils.optimizer import adam,rmsprop
-from __init__ import BaseModel
-from datasets.synthp import params_synthetic
-from datasets.synthpTheano import updateParamsSynthetic
+from ..utils.optimizer import adam,rmsprop
+from . import BaseModel
+from ..datasets.synthp import params_synthetic
+from ..datasets.synthpTheano import updateParamsSynthetic
 
 class LSTM(BaseModel, object):
     """
