@@ -8,8 +8,8 @@ setup(
         description='A lightweight wrapper around theano for rapid-prototyping of machine learning models.',
         long_description=open('README.md').read(),
         url='https://github.com/clinicalml/theanomodels/tree/change_to_relative_imports',
-        author='Rahul G. Krishnan',
-        author_email='rahul@cs.nyu.edu',
+        author='Rahul G. Krishnan, Justin Mao-Jones',
+        author_email='rahul@cs.nyu.edu, justinmaojones@gmail.com',
         license='MIT',
         classifiers=[
             # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
