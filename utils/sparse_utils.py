@@ -18,7 +18,14 @@ def saveSparseHDF5(matrix, prefix, fname):
                 data = getattr(matrix, info)
             except:
                 assert False,'Expecting attribute '+info+' in matrix'
-            f.create_dataset(key,data= data)
+            """
+            For empty arrays, data, indicies and indptr will be []
+            To deal w/ this use np.nan in its place
+            """
+            if len(data)==0:
+                f.create_dataset(key,data=np.array([np.nan]))
+            else:
+                f.create_dataset(key,data= data)
         key = prefix+'_type'
         val = matrix.__class__.__name__
         f.attrs[key] = np.string_(val)
@@ -33,14 +40,23 @@ def loadSparseHDF5(prefix, fname, changeval = None):
             params.append(f[key].value)
         key = prefix+'_type'
         dtype=f.attrs[key]
-        if changeval is not None:
-            params[0] = params[0]*0.+changeval
-        if dtype=='csc_matrix':
-            data = csc_matrix(tuple(params[:3]),shape=params[3])
-        elif dtype=='csr_matrix':
-            data = csr_matrix(tuple(params[:3]),shape=params[3])
-        else:
-            assert False,'Not supported: '+dtype 
+        params = [np.array([]) if np.isnan(np.array(k).sum()) else k for k in params] 
+        if len(params[0])==0: #Empty data matrix
+            if dtype  =='csc_matrix':
+                data = csc_matrix(tuple(params[3])) 
+            elif dtype=='csr_matrix':
+                data = csr_matrix(tuple(params[3]))
+            else:
+                raise TypeError('dtype not supported: '+dtype) 
+        else:                 #Reconstruct sparse matrix while changing data values if necessary
+            if changeval is not None:
+                params[0] = params[0]*0.+changeval
+            if dtype=='csc_matrix':
+                data = csc_matrix(tuple(params[:3]),shape=params[3])
+            elif dtype=='csr_matrix':
+                data = csr_matrix(tuple(params[:3]),shape=params[3])
+            else:
+                raise TypeError('dtype not supported: '+dtype) 
     return data
 
 def _testSparse():
