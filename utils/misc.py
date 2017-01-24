@@ -199,7 +199,7 @@ def extractData(DIR, locations):
         if '.zip' in f:
             with zipfile.ZipFile(DIR+'/'+f,"r") as zf:
                 zf.extractall(DIR)
-        elif '.tgz' in f:
+        elif '.tgz' in f or '.tar.gz' in f:
             with tarfile.open(DIR+'/'+f,"r") as tf:
                 tf.extractall(DIR)
         elif '.bz2' in f:
