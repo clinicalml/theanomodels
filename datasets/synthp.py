@@ -254,16 +254,16 @@ params_synthetic['synthetic15']['dim_obs']     = 10
 params_synthetic['synthetic15']['dim_stoc']    = 10
 params_synthetic['synthetic15']['params']      = {}
 
-params_synthetic['synthetic15']['trans_cov']   = 1.
+params_synthetic['synthetic15']['trans_cov']   = 10.
 params_synthetic['synthetic15']['trans_cov_full']   = np.zeros((10,10))
-np.fill_diagonal(params_synthetic['synthetic15']['trans_cov_full'], 1.)
+np.fill_diagonal(params_synthetic['synthetic15']['trans_cov_full'], 10.)
 
 params_synthetic['synthetic15']['trans_drift'] = saved_matrices_2['btrans_10'] 
 params_synthetic['synthetic15']['trans_mult']  = saved_matrices_2['Wtrans_10']
 
-params_synthetic['synthetic15']['obs_cov']     = 10.
+params_synthetic['synthetic15']['obs_cov']     = 20.
 params_synthetic['synthetic15']['obs_cov_full']= np.zeros((10,10))
-np.fill_diagonal(params_synthetic['synthetic15']['obs_cov_full'], 10.)
+np.fill_diagonal(params_synthetic['synthetic15']['obs_cov_full'], 20.)
 
 params_synthetic['synthetic15']['obs_drift']   = np.ones((10,))*0. 
 params_synthetic['synthetic15']['obs_mult']    = saved_matrices_2['Wobs_10'] 
@@ -288,16 +288,16 @@ params_synthetic['synthetic16']['dim_obs']     = 100
 params_synthetic['synthetic16']['dim_stoc']    = 100
 params_synthetic['synthetic16']['params']      = {}
 
-params_synthetic['synthetic16']['trans_cov']   = 1.
+params_synthetic['synthetic16']['trans_cov']   = 10.
 params_synthetic['synthetic16']['trans_cov_full']   = np.zeros((100,100))
-np.fill_diagonal(params_synthetic['synthetic16']['trans_cov_full'],1.)
+np.fill_diagonal(params_synthetic['synthetic16']['trans_cov_full'],10.)
 
 params_synthetic['synthetic16']['trans_drift'] = saved_matrices_2['btrans_100'] 
 params_synthetic['synthetic16']['trans_mult']  = saved_matrices_2['Wtrans_100']
 
-params_synthetic['synthetic16']['obs_cov']     = 10.
+params_synthetic['synthetic16']['obs_cov']     = 20.
 params_synthetic['synthetic16']['obs_cov_full']= np.zeros((100,100))
-np.fill_diagonal(params_synthetic['synthetic16']['obs_cov_full'],10.)
+np.fill_diagonal(params_synthetic['synthetic16']['obs_cov_full'],20.)
 
 params_synthetic['synthetic16']['obs_drift']   = np.ones((100,))*0. 
 params_synthetic['synthetic16']['obs_mult']    = saved_matrices_2['Wobs_100']
@@ -321,16 +321,16 @@ params_synthetic['synthetic17']['dim_obs']     = 250
 params_synthetic['synthetic17']['dim_stoc']    = 250
 params_synthetic['synthetic17']['params']      = {}
 
-params_synthetic['synthetic17']['trans_cov']   = 1.
+params_synthetic['synthetic17']['trans_cov']   = 10.
 params_synthetic['synthetic17']['trans_cov_full']   = np.zeros((250,250))
-np.fill_diagonal(params_synthetic['synthetic17']['trans_cov_full'],1.)
+np.fill_diagonal(params_synthetic['synthetic17']['trans_cov_full'],10.)
 
 params_synthetic['synthetic17']['trans_drift'] = saved_matrices_2['btrans_250'] 
 params_synthetic['synthetic17']['trans_mult']  = saved_matrices_2['Wtrans_250']
 
-params_synthetic['synthetic17']['obs_cov']     = 10.
+params_synthetic['synthetic17']['obs_cov']     = 20.
 params_synthetic['synthetic17']['obs_cov_full']     = np.zeros((250,250))
-np.fill_diagonal(params_synthetic['synthetic17']['obs_cov_full'],10.)
+np.fill_diagonal(params_synthetic['synthetic17']['obs_cov_full'],20.)
 
 params_synthetic['synthetic17']['obs_drift']   = np.ones((250,))*0. 
 params_synthetic['synthetic17']['obs_mult']    = saved_matrices_2['Wobs_250']
@@ -357,16 +357,16 @@ params_synthetic['synthetic18']['dim_obs']     = 10
 params_synthetic['synthetic18']['dim_stoc']    = 10
 params_synthetic['synthetic18']['params']      = {}
 
-params_synthetic['synthetic18']['trans_cov']   = 1.
+params_synthetic['synthetic18']['trans_cov']   = 10.
 params_synthetic['synthetic18']['trans_cov_full']   = np.zeros((10,10))
-np.fill_diagonal(params_synthetic['synthetic18']['trans_cov_full'], 1.)
+np.fill_diagonal(params_synthetic['synthetic18']['trans_cov_full'], 10.)
 
 params_synthetic['synthetic18']['trans_drift'] = saved_matrices_2['btrans_10_diag'] 
 params_synthetic['synthetic18']['trans_mult']  = saved_matrices_2['Wtrans_10_diag']
 
-params_synthetic['synthetic18']['obs_cov']     = 10.
+params_synthetic['synthetic18']['obs_cov']     = 20.
 params_synthetic['synthetic18']['obs_cov_full']= np.zeros((10,10))
-np.fill_diagonal(params_synthetic['synthetic18']['obs_cov_full'], 10.)
+np.fill_diagonal(params_synthetic['synthetic18']['obs_cov_full'], 20.)
 
 params_synthetic['synthetic18']['obs_drift']   = np.ones((10,))*0. 
 params_synthetic['synthetic18']['obs_mult']    = saved_matrices_2['Wobs_10_diag'] 
@@ -391,16 +391,16 @@ params_synthetic['synthetic19']['dim_obs']     = 100
 params_synthetic['synthetic19']['dim_stoc']    = 100
 params_synthetic['synthetic19']['params']      = {}
 
-params_synthetic['synthetic19']['trans_cov']   = 1.
+params_synthetic['synthetic19']['trans_cov']   = 10.
 params_synthetic['synthetic19']['trans_cov_full']   = np.zeros((100,100))
-np.fill_diagonal(params_synthetic['synthetic19']['trans_cov_full'],1.)
+np.fill_diagonal(params_synthetic['synthetic19']['trans_cov_full'],10.)
 
 params_synthetic['synthetic19']['trans_drift'] = saved_matrices_2['btrans_100_diag'] 
 params_synthetic['synthetic19']['trans_mult']  = saved_matrices_2['Wtrans_100_diag']
 
-params_synthetic['synthetic19']['obs_cov']     = 10.
+params_synthetic['synthetic19']['obs_cov']     = 20.
 params_synthetic['synthetic19']['obs_cov_full']= np.zeros((100,100))
-np.fill_diagonal(params_synthetic['synthetic19']['obs_cov_full'],10.)
+np.fill_diagonal(params_synthetic['synthetic19']['obs_cov_full'],20.)
 
 params_synthetic['synthetic19']['obs_drift']   = np.ones((100,))*0. 
 params_synthetic['synthetic19']['obs_mult']    = saved_matrices_2['Wobs_100_diag']
@@ -424,16 +424,16 @@ params_synthetic['synthetic20']['dim_obs']     = 250
 params_synthetic['synthetic20']['dim_stoc']    = 250
 params_synthetic['synthetic20']['params']      = {}
 
-params_synthetic['synthetic20']['trans_cov']   = 1.
+params_synthetic['synthetic20']['trans_cov']   = 10.
 params_synthetic['synthetic20']['trans_cov_full']   = np.zeros((250,250))
-np.fill_diagonal(params_synthetic['synthetic20']['trans_cov_full'],1.)
+np.fill_diagonal(params_synthetic['synthetic20']['trans_cov_full'],10.)
 
 params_synthetic['synthetic20']['trans_drift'] = saved_matrices_2['btrans_250_diag'] 
 params_synthetic['synthetic20']['trans_mult']  = saved_matrices_2['Wtrans_250_diag']
 
-params_synthetic['synthetic20']['obs_cov']     = 10.
+params_synthetic['synthetic20']['obs_cov']     = 20.
 params_synthetic['synthetic20']['obs_cov_full']     = np.zeros((250,250))
-np.fill_diagonal(params_synthetic['synthetic20']['obs_cov_full'],10.)
+np.fill_diagonal(params_synthetic['synthetic20']['obs_cov_full'],20.)
 
 params_synthetic['synthetic20']['obs_drift']   = np.ones((250,))*0. 
 params_synthetic['synthetic20']['obs_mult']    = saved_matrices_2['Wobs_250_diag']

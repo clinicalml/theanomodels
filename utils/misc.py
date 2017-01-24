@@ -1,4 +1,5 @@
 import os,h5py,sys,glob
+import tarfile, zipfile
 import numpy as np
 import cPickle as pickle
 
@@ -192,6 +193,19 @@ def productOfBernoullisMLE(train, test):
         NLL_train /=float(train.shape[0])
         return NLL_train, NLL_test, params
 
+
+def extractData(DIR, locations):
+    for f in locations:
+        if '.zip' in f:
+            with zipfile.ZipFile(DIR+'/'+f,"r") as zf:
+                zf.extractall(DIR)
+        elif '.tgz' in f:
+            with tarfile.open(DIR+'/'+f,"r") as tf:
+                tf.extractall(DIR)
+        elif '.bz2' in f:
+            os.system('bunzip '+DIR+'/'+f)
+        else:
+            print 'Unrecognized compressed file representation'
 def downloadData(DIR, locations):
     for fname in locations:
         if not os.path.exists(DIR+'/'+fname):
