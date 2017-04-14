@@ -19,22 +19,22 @@ class BaseModel:
     Base Level Class for ML Models
     -Base level class that keeps the bare minimum amount of functionality
     -Allows loading/saving model from checkpoints (including optimization parameters)
-    
+
     TODO: Does preserve randomness, i.e the random seeds would be different when restarted (low priority)
     """
-    def __init__(self, params, paramFile=None, reloadFile=None, 
+    def __init__(self, params, paramFile=None, reloadFile=None,
             additional_attrs = {},
-            dataset_train = np.array([0]), 
-            dataset_valid= np.array([0]), 
-            dataset_test = np.array([0]), 
+            dataset_train = np.array([0]),
+            dataset_valid= np.array([0]),
+            dataset_test = np.array([0]),
             dataset = np.array([0])):
         """
         MLModel
         params : Hashtable with parameters relevant to the model at hand
         paramFile : Location to save parameter file
         reloadFile: [Reloading Model from npz]
-        dataset: (Optional) This is used when the dataset needs to be on the GPU. 
-                            Set dataset to be the training data. During learning, you can then index 
+        dataset: (Optional) This is used when the dataset needs to be on the GPU.
+                            Set dataset to be the training data. During learning, you can then index
                             self.dataset (which will be a theano shared variable) like so:
                             X = self.dataset_train[bidx] to represent the current batch during training
                             (similarly X = self.dataset_eval[bidx])
@@ -56,12 +56,12 @@ class BaseModel:
         else:
             self.params     = params
             self.npWeights = self._createParams()
-            assert self.npWeights is not None,'Expecting self.npWeights to be defined' 
+            assert self.npWeights is not None,'Expecting self.npWeights to be defined'
             self._saveParams(paramFile)
         self.tWeights = self._makeTheanoShared(self.npWeights)
-        #Added on May 10: Backwards compatibility. If you add more parameters to params, you'd like to 
+        #Added on May 10: Backwards compatibility. If you add more parameters to params, you'd like to
         #be able to add them into the params so that you can build old models on potentially different
-        #configurations. 
+        #configurations.
         for k in params:
             if (k in params and k not in self.params) or self.params[k]!=params[k]:
                 print 'Adding/Modifying loaded parameters: ',k,' to ',params[k]
@@ -80,8 +80,8 @@ class BaseModel:
             self.tOptWeights  = None
         start_time = time.time()
         self.srng = RandomStreams(params['seed'])
-        #Use this for updates that you might need to specify differently from your training function. 
-        #Used for batch normalization 
+        #Use this for updates that you might need to specify differently from your training function.
+        #Used for batch normalization
         self.updates     = []
         self.updates_ack = False
 
@@ -132,7 +132,7 @@ class BaseModel:
         self.params        = self._loadPickle(paramFile)
         self.npWeights     = np.load(reloadFile)
         self.npOptWeights  = np.load(optFile)
-        
+
     def _saveModel(self,fname = None):
         """
         _saveModel: Save model to "fname". Uses a separate file for parameters and optimization params
@@ -145,7 +145,7 @@ class BaseModel:
         weights_opt = self._getValuesFromShared(self.tOptWeights)
         np.savez(fname_opt, **weights_opt)
         self._p(('Saved model (%s) \n\t\t opt (%s) weights')%(fname_par,fname_opt))
-    
+
     def _getValuesFromShared(self,dictIn):
         """
         _getValuesFromShared: Get numpy arrays from theano shared variables in dictIn
@@ -154,7 +154,7 @@ class BaseModel:
         for kk, vv in dictIn.items():
             new_params[kk] = vv.get_value()
         return new_params
-    
+
     def _countParams(self):
         """
         _countParams: Count the number of parameters in the model
@@ -164,7 +164,7 @@ class BaseModel:
             ctr = np.array(self.npWeights[k].shape).prod()
             self.nParams+= ctr
         self._p(('Nparameters: %d')%self.nParams)
-    
+
     def _loadPickle(self,f):
         """
         _loadPickle: Load (first item) from pickle file
@@ -177,14 +177,14 @@ class BaseModel:
         _savePickle: Save data to pickle file
         """
         with open(f,'wb') as pklf:
-            pickle.dump(data,pklf) 
+            pickle.dump(data,pklf)
     def _saveParams(self, pklname = None):
         """
         _saveParams: Save data to pickle file
         """
         assert pklname is not None,'Expecting name of file to be saved'
         self._savePickle(pklname, self.params)
-    
+
     def _addWeights(self, name, data, **kwargs):
         """
         Add to npWeights/tWeights
@@ -225,18 +225,18 @@ class BaseModel:
                     namelist.append(k.name)
         self._p('Modifying : ['+','.join(namelist)+']')
         return paramlist
-    
+
     def _makeTheanoShared(self, dictIn):
         """
-        _makeTheanoShared:  return an Ordered dictionary with the same keys as "dictIn" 
+        _makeTheanoShared:  return an Ordered dictionary with the same keys as "dictIn"
                         except with elements initialized to theano shared variables
         """
         tWeights = OrderedDict()
         for kk, pp in dictIn.items():
             tWeights[kk] = theano.shared(dictIn[kk], name=kk, borrow=True)
         return tWeights
-    
-    
+
+
     def _checkMatrix(self, mat):
         """
         Use to debug functions. Check if any element is nan or inf and print the norm
@@ -246,19 +246,19 @@ class BaseModel:
         if np.any(np.isinf(mat)):
             self._p('checkMatrix: inf found')
         self._p('Norm: %.4f:'%np.linalg.norm(mat))
-    
+
     """
-    Initializing weights of model    
+    Initializing weights of model
     """
     def _getWeight(self, shape, scheme = None):
         """
         _getWeight: Wrapper for initializing weights
         Assumes w = self.params['init_weight'] has been set
-        
+
         lstm: Initializing LSTM weights using orthogonal weight matrices
         and large forget gate biases
-        
-        uniform: 
+
+        uniform:
         """
         if scheme is None: #Default to the pre-specified scheme
             scheme = self.params['init_scheme']
@@ -279,11 +279,11 @@ class BaseModel:
             return self._getHe2015(shape)
         else:
             return self._getUniformWeight(shape)
-    
+
     def _getLSTMWeight(self, shape):
         """
         http://yyue.blogspot.com/2015/01/a-brief-overview-of-deep-learning.html
-        For LSTMs, use orthogonal initializations for the weight matrices and 
+        For LSTMs, use orthogonal initializations for the weight matrices and
         set the forget gate biases to be high
         """
         if len(shape)==1: #bias
@@ -303,14 +303,14 @@ class BaseModel:
                                   ,axis=1).astype(config.floatX)
         else:
             assert False,'Should not get here'
-        
+
     def _getUniformWeight(self, shape):
         """
-        _getUniformWeight: Initialize weight matrix of dimensions "shape" using uniform 
+        _getUniformWeight: Initialize weight matrix of dimensions "shape" using uniform
                     [-self.params['init_weight'], self.params['init_weight']]
         """
         return np.random.uniform(-self.params['init_weight'],self.params['init_weight'],shape).astype(config.floatX)
-    
+
     def _getGaussianWeight(self, shape):
         """
         Initialize weight matrix of dimensions "shape" using normal with variance
@@ -327,14 +327,14 @@ class BaseModel:
             K = np.sqrt(2./float((1+self.params['leaky_param']**2)*(shape[0])))
         else:
             K = np.sqrt(1./float(shape[0]))
-    
+
         if initializer=='uniform':
             return np.random.uniform(-K,K,shape).astype(config.floatX)
         elif initializer=='normal':
             return np.random.normal(0,K,shape).astype(config.floatX)
         else:
             assert False,'Invalid initializer in _getXavierWeight'
-            
+
     def _getXavierWeight(self, shape):
         """
         Xavier Initialization
@@ -353,7 +353,7 @@ class BaseModel:
             return np.random.normal(0,K,shape).astype(config.floatX)
         else:
             assert False,'Invalid initializer in _getXavierWeight'
-    
+
     def _getOrthogonalWeight(self, shape):
         """
         _getWeight: Initialize weight matrix of dimensions "shape" with orthonal columns
@@ -365,7 +365,7 @@ class BaseModel:
         W    = np.random.randn(*shape)
         q, r = np.linalg.qr(W)
         return q.astype(config.floatX)
-    
+
     def _applyNL(self,lin_out):
         if self.params['nonlinearity']=='relu':
             if 'leaky_params' in self.params:
@@ -387,14 +387,14 @@ class BaseModel:
             return maxout_out
         else:
             return T.tanh(lin_out)
-    
+
     def _BNlayer(self, W, b, inp, onlyLinear = False, evaluation=False, convolution=False,momentum=0.95,eps=1e-3):
         """
                                 Batch normalization layer
         Based on the implementation from: https://github.com/shuuki4/Batch-Normalization
         a) Support for 3D tensors (for time series data) - here, the last layer is the dimension of the data
         b) Create gamma/beta, create updates for gamma/beta
-        c) Different for train/evaluation. 
+        c) Different for train/evaluation.
         d) Different for convolutional layers
         """
         W_name     = W.name
@@ -408,7 +408,7 @@ class BaseModel:
         beta_name  = W_name+'_BN_beta'
         self._addWeights(gamma_name, gamma_init, borrow=True)
         self._addWeights(beta_name,  beta_init,  borrow=True)
-        #Create a running mean that will not be differentiated 
+        #Create a running mean that will not be differentiated
         mean_name  = W_name.replace('W','').replace('__','_')+'BN_running_mean'
         var_name   = W_name.replace('W','').replace('__','_')+'BN_running_var'
         mean_init  = np.zeros((W_shape[1],), dtype=config.floatX)
@@ -425,9 +425,9 @@ class BaseModel:
                 normalized = (lin-self.tWeights[mean_name])/T.sqrt(self.tWeights[var_name]+eps)
                 bn_lin     = self.tWeights[gamma_name]*normalized + self.tWeights[beta_name]
             else:
-                if lin.ndim==2: 
-                    cur_mean   = lin.mean(0) 
-                    cur_var    = lin.var(0) 
+                if lin.ndim==2:
+                    cur_mean   = lin.mean(0)
+                    cur_var    = lin.var(0)
                 elif lin.ndim==3:
                     #For now, normalizing across time
                     cur_mean   = lin.mean((0,1))
@@ -450,7 +450,7 @@ class BaseModel:
 
     def _LayerNorm(self, W, b, inp, onlyLinear=False, eps=1e-6):
         """
-                               Layer Normalization 
+                               Layer Normalization
         Implementation of https://arxiv.org/abs/1607.06450
         a) First perform linear transformation T.dot(inp,W)+b
         b) W must have at least 2 dimensions
@@ -475,7 +475,7 @@ class BaseModel:
         normalized = (lin-mean) / T.sqrt(var+eps)
         LN_output = gain*normalized + bias
         if onlyLinear:
-            return LN_output 
+            return LN_output
         else:
             return self._applyNL(LN_output)
 
@@ -495,7 +495,7 @@ class BaseModel:
         lin = T.dot(inp,W)+b
         dlin= self._dropout(lin, p=p)
         return self._applyNL(dlin)
-    
+
     def _dropout(self, X, p=0.):
         """
         _dropout : X is the input, p is the dropout probability
@@ -506,7 +506,7 @@ class BaseModel:
             X *= self.srng.binomial(X.shape, p=retain_prob, dtype=theano.config.floatX)
             X /= retain_prob
         return X
-    
+
     def _setupOptimizer(self, cost, params, lr, **kwargs):
         """
         _setupOptimizer :   Wrapper for calling optimizer specified for the model. Internally also updates
@@ -517,14 +517,14 @@ class BaseModel:
         returns: updates (list of tuples specifying updates for all the shared variables in the model)
                  norm_list (for debugging, [0] : norm of parameters, [1] : norm of gradients, [2] : norm of optimization weights)
         """
-        optimizer_up, norm_list, opt_params = self.optimizer(cost, params, lr=lr, 
+        optimizer_up, norm_list, opt_params = self.optimizer(cost, params, lr=lr,
                                                              opt_params = self.tOptWeights, **kwargs)
         #If we passed in None initially then set optWeights
         if self.tOptWeights is None:
             self.tOptWeights = opt_params
         return optimizer_up, norm_list
-    
-    
+
+
     def _llGaussian(self, z, mu, logcov, mix_probs = None):
         """
         Estimate log-likelihood under a gaussian distribution
@@ -534,14 +534,14 @@ class BaseModel:
     """
                                  Implementation of LSTMs
     """
-    def _LSTMlayer(self, inp, suffix, dropout_prob=0., RNN_SIZE = None):
+    def _LSTMlayer(self, inp, suffix, dropout_prob=0., RNN_SIZE = None, init_h = None):
         """
         LSTM layer that takes as input inp [bs x T x dim] and returns the result of running an LSTM on it
         Input: inp [bs x T x dim]
                suffix [l/r]
                dropout applied at output of LSTM
         Output of LSTM:hid [T  x bsx dim]
- 
+
         This function expects the following to be defined:
         params: rnn_size, nonlinearity, rnn_layers
         tWeights: W_lstm_<suffix>_0, U_lstm_<suffix>_0, b_lstm_<suffix>_0
@@ -554,7 +554,7 @@ class BaseModel:
         assert suffix=='r' or suffix=='l' or suffix=='p_l','Invalid suffix: '+suffix
         doBackwards = False
         if suffix=='r':
-            doBackwards = True 
+            doBackwards = True
         #Get Slice
         def _slice(mat, n, dim):
             if mat.ndim == 3:
@@ -578,27 +578,31 @@ class BaseModel:
         nsteps     = lstm_embed.shape[0]
         n_samples  = lstm_embed.shape[1]
         stepfxn    = _1layer
-        o_info     =[T.alloc(np.asarray(0.,dtype=config.floatX), n_samples, RNN_SIZE),
-                T.alloc(np.asarray(1.,dtype=config.floatX), n_samples, RNN_SIZE) ]
+        if init_h is not None:
+            o_info     =[init_h,
+                         T.alloc(np.asarray(1.,dtype=config.floatX), n_samples, RNN_SIZE) ]
+        else:
+            o_info     =[T.alloc(np.asarray(0.,dtype=config.floatX), n_samples, RNN_SIZE),
+                         T.alloc(np.asarray(1.,dtype=config.floatX), n_samples, RNN_SIZE) ]
         n_seq      =[self.tWeights['U_lstm_'+suffix+'_0']]
 
         lstm_input = lstm_embed
         #Reverse the input
         if doBackwards:
             lstm_input = lstm_input[::-1]
-        rval, _= theano.scan(stepfxn, 
+        rval, _= theano.scan(stepfxn,
                               sequences=[lstm_input],
                               outputs_info=o_info,
                               non_sequences = n_seq,
-                              name='LSTM_'+suffix, 
+                              name='LSTM_'+suffix,
                               n_steps=nsteps)
         #set the output
         lstm_output =  rval[0]
         #Reverse the output
-        if doBackwards: 
+        if doBackwards:
             lstm_output = lstm_output[::-1]
         return self._dropout(lstm_output, dropout_prob)
-    
+
     def meanSumExp(self,mat,axis=1):
         """
         Estimate log 1/S \sum_s exp[ log k ] in a numerically stable manner along "axis"
@@ -610,4 +614,3 @@ class BaseModel:
         mat_max = T.max(mat, axis=axis, keepdims=True)
         lse = T.log(T.sum(T.exp(mat - mat_max), axis=axis, keepdims=True)) + mat_max
         return lse
-
