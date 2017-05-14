@@ -63,7 +63,7 @@ class BaseModel:
         #be able to add them into the params so that you can build old models on potentially different
         #configurations.
         for k in params:
-            if (k in params and k not in self.params) or self.params[k]!=params[k]:
+            if (k in params and k not in self.params) or np.any(self.params[k]!=params[k]):
                 print 'Adding/Modifying loaded parameters: ',k,' to ',params[k]
                 self.params[k]= params[k]
         self._countParams()
