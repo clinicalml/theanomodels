@@ -587,7 +587,6 @@ class BaseModel:
         n_seq      =[self.tWeights['U_lstm_'+suffix+'_0']]
 
         lstm_input = lstm_embed
-        #Reverse the input
         if doBackwards:
             lstm_input = lstm_input[::-1]
         rval, _= theano.scan(stepfxn,
@@ -596,9 +595,7 @@ class BaseModel:
                               non_sequences = n_seq,
                               name='LSTM_'+suffix,
                               n_steps=nsteps)
-        #set the output
         lstm_output =  rval[0]
-        #Reverse the output
         if doBackwards:
             lstm_output = lstm_output[::-1]
         return self._dropout(lstm_output, dropout_prob)
@@ -614,3 +611,78 @@ class BaseModel:
         mat_max = T.max(mat, axis=axis, keepdims=True)
         lse = T.log(T.sum(T.exp(mat - mat_max), axis=axis, keepdims=True)) + mat_max
         return lse
+
+    """
+    Evaluate Negative Log Likelihoods
+    """
+    def _nll_mixed(self, hid , X, data_types = None, mask = None):
+        """
+        Calculate Negative Log Likelihood of Mixed Data [Binary and Real-Valued]
+        Model:  hid is a function of model parameters 
+        Shapes: hid.shape[1] =  [#binary, #real, #real]   
+
+        TODO: 
+        * Add support for allowing a fixed covariance (not learned)
+        * Add support for modeling multinomial (categorical) RVs
+        """
+        if data_types is None:
+            raise ValueError('Expecting data_types to be specified as a list')
+        if not np.all(np.unique(data_types)==np.unique(['binary','continuous'])):
+            raise ValueError('Check data types - only binary and real supported')
+        binary_idx = np.where(data_types=='binary')[0]    
+        real_idx   = np.where(data_types=='real')[0]
+
+        X_bin      = X[:,:,binary_idx]
+        binary_hid = hid[:,:len(binary_idx)]
+        nll_bin    = self._nll_binary(binary_hid, X_bin) 
+
+        X_real     = X[:,:,real_idx]
+        real_hid_mu       = hid[:,len(binary_idx):len(binary_idx)+len(real_idx)]
+        real_hid_logcov   = hid[:,len(binary_idx)+len(real_idx):len(binary_idx)+len(real_idx)*2]
+        nll_real   = self._nll_gaussian(real_hid_mu, real_hid_logcov, X_real)
+        if mask is not None:
+            return T.concatenate([nll_bin*mask[:,binary_idx], nll_real*mask[:,real_idx]], axis=1)
+        else:
+            return T.concatenate([nll_bin, nll_real], axis=1)
+
+    def _nll_binary(self, hid, X, mask = None):
+        """
+        Calculate Negative Log Likelihood of Binary Data
+        Model: hid is a function of model parameters 
+        Shapes: hid.shape == X.shape
+        """
+        mean_p = T.nnet.sigmoid(hid)
+        nll    = T.nnet.binary_crossentropy(mean_p,X)
+        if mask is not None:
+            return nll*mask
+        else:
+            return nll
+    
+    def _nll_gaussian(self, mu, logcov, X, mask = None):
+        """
+        Calculate Negative Log Likelihood
+        Model: mu/logcov are functions of model parameters
+        Data:  X is assumed to be drawn from Normal(mu, logcov)
+        Shapes: mu.shape==logcov.shape (diagonal log-covariance) == X.shape
+        """
+        nll = 0.5*(np.log(2*np.pi)+logcov+((X-mu)**2/T.exp(logcov)))
+        if mask is not None:
+            return nll*mask
+        else:
+            return nll
+    
+    def _nll_multinomial(self, hid, X, mask = None):
+        """
+        Calculate Negative Log Likelihood
+        Model: hid is the hidden representation (function of model parameters)  
+        Data: X is assumed to be drawn from the Multinomial distribution parameterized as Softmax(hid) 
+        """
+        raise NotImplemented('_nll_multinomial')
+    
+    def _nll_poisson(self):
+        """
+        Calculate Negative Log Likelihood
+        Model: hide is the hidden representation (function of model parameters) 
+        Data : X is assumed to be drawn from the Poisson distribution  
+        """
+        raise NotImplemented('_nll_multinomial')
