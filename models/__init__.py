@@ -615,37 +615,63 @@ class BaseModel:
     """
     Evaluate Negative Log Likelihoods
     """
-    def _nll_mixed(self, hid , X, data_types = None, mask = None):
+    def _apply_mask(self, loss_tensor, mask_tensor):
+        """
+        The application of the mask depends on the loss tensor and mask_tensor
+        loss_tensor: 2/3 dimensional [1/0 either per feature or per timestep]
+        mask_tensor: 2/3 dimensional [bs x dim or bs x T x dim]
+        Return: masked_loss [bs x dim] or [bs x T x dim] where the mask is applied appropriately 
+        """
+        if loss_tensor.ndim==3:
+            if mask_tensor.ndim==3:
+                return loss_tensor*mask_tensor
+            elif mask_tensor.ndim==2:
+                return loss_tensor*mask_tensor[:,:,None] 
+            else:
+                raise ValueError('No support for other dimensionalities')
+        elif loss_tensor.ndim==2:
+            if mask_tensor.ndim==2:
+                return mask_tensor*loss_tensor
+            else:
+                raise ValueError('No support for other dimensionalities')
+        else:
+            raise ValueError('Mask tensor must be 2/3 dimensional')
+
+    def _nll_mixed(self, hid, X, ftypes = None, mask = None, params = None):
         """
         Calculate Negative Log Likelihood of Mixed Data [Binary and Real-Valued]
         Model:  hid is a function of model parameters 
         Shapes: hid.shape[1] =  [#binary, #real, #real]   
-
+        
+        Added support for 2D & 3D observations 
         TODO: 
         * Add support for allowing a fixed covariance (not learned)
         * Add support for modeling multinomial (categorical) RVs
         """
-        if data_types is None:
-            raise ValueError('Expecting data_types to be specified as a list')
-        if not np.all(np.unique(data_types)==np.unique(['binary','continuous'])):
+        if ftypes is None:
+            raise ValueError('Expecting feature_types to be specified as a list')
+        if not np.all(np.unique(ftypes)==np.unique(['binary','continuous'])):
             raise ValueError('Check data types - only binary and real supported')
-        binary_idx = np.where(data_types=='binary')[0]    
-        real_idx   = np.where(data_types=='real')[0]
-
-        X_bin      = X[:,:,binary_idx]
-        binary_hid = hid[:,:len(binary_idx)]
-        nll_bin    = self._nll_binary(binary_hid, X_bin) 
-
-        X_real     = X[:,:,real_idx]
-        real_hid_mu       = hid[:,len(binary_idx):len(binary_idx)+len(real_idx)]
-        real_hid_logcov   = hid[:,len(binary_idx)+len(real_idx):len(binary_idx)+len(real_idx)*2]
-        nll_real   = self._nll_gaussian(real_hid_mu, real_hid_logcov, X_real)
+        binary_idx = np.where(ftypes=='binary')[0]    
+        real_idx   = np.where(ftypes=='continuous')[0]
+        lbin, lreal= len(binary_idx), len(real_idx)
+        mask_bin, mask_real = None, None
         if mask is not None:
-            return T.concatenate([nll_bin*mask[:,binary_idx], nll_real*mask[:,real_idx]], axis=1)
-        else:
-            return T.concatenate([nll_bin, nll_real], axis=1)
+            mask_bin = T.take(mask, binary_idx, axis=-1)
+            mask_real= T.take(mask, real_idx, axis=-1)
+        X_bin        = T.take(X,binary_idx,axis=-1)
+        binary_hid   = T.take(hid, T.arange(lbin), axis=-1) 
+        nll_bin      = self._nll_binary(binary_hid, X_bin, params = params, mask=mask_bin) 
 
-    def _nll_binary(self, hid, X, mask = None):
+        X_real            = T.take(X, real_idx, axis=-1)
+        mu_idx            = T.arange(lbin,lbin+lreal)
+        real_hid_mu       = T.take(hid, mu_idx,axis=-1)
+        logcov_idx        = T.arange(lbin+lreal,lbin+2*lreal)
+        real_hid_logcov   = T.take(hid,logcov_idx,axis=-1)
+        nll_real          = self._nll_gaussian(real_hid_mu, real_hid_logcov, X_real, params = params, mask=mask_real)
+        return T.concatenate([nll_bin, nll_real], axis=-1)
+
+    def _nll_binary(self, hid, X, mask = None, params = None):
         """
         Calculate Negative Log Likelihood of Binary Data
         Model: hid is a function of model parameters 
@@ -653,12 +679,13 @@ class BaseModel:
         """
         mean_p = T.nnet.sigmoid(hid)
         nll    = T.nnet.binary_crossentropy(mean_p,X)
+        if params is not None:
+            params['bin_prob'] = mean_p
         if mask is not None:
-            return nll*mask
-        else:
-            return nll
-    
-    def _nll_gaussian(self, mu, logcov, X, mask = None):
+            return self._apply_mask(nll, mask)
+        return nll
+
+    def _nll_gaussian(self, mu, logcov, X, mask = None, params = None):
         """
         Calculate Negative Log Likelihood
         Model: mu/logcov are functions of model parameters
@@ -666,12 +693,14 @@ class BaseModel:
         Shapes: mu.shape==logcov.shape (diagonal log-covariance) == X.shape
         """
         nll = 0.5*(np.log(2*np.pi)+logcov+((X-mu)**2/T.exp(logcov)))
+        if params is not None:
+            params['real_mu']     = mu
+            params['real_logcov'] = logcov
         if mask is not None:
-            return nll*mask
-        else:
-            return nll
+            return self._apply_mask(nll, mask)
+        return nll
     
-    def _nll_multinomial(self, hid, X, mask = None):
+    def _nll_multinomial(self, hid, X, params = None):
         """
         Calculate Negative Log Likelihood
         Model: hid is the hidden representation (function of model parameters)  
@@ -679,7 +708,7 @@ class BaseModel:
         """
         raise NotImplemented('_nll_multinomial')
     
-    def _nll_poisson(self):
+    def _nll_poisson(self, hid, X, params = None):
         """
         Calculate Negative Log Likelihood
         Model: hide is the hidden representation (function of model parameters) 
