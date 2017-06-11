@@ -211,20 +211,20 @@ def extractData(DIR, locations):
 def downloadData(DIR, locations):
     for fname in locations:
         if not os.path.exists(DIR+'/'+fname):
+            cmd = 'wget '+locations[fname]+' -O '+DIR+'/'+fname
+            print 'Execute: ',cmd
+            os.system(cmd)
+        if not os.path.exists(DIR+'/'+fname):
             cmd = 'curl -o '+DIR+'/'+fname+' '+locations[fname]
             print 'Executing: ',cmd
             os.system(cmd)
-            if not os.path.exists(DIR+'/'+fname):
-                cmd = 'wget '+locations[fname]+' -O '+DIR+'/'+fname
-                print 'Execute: ',cmd
-                os.system(cmd)
-            if not os.path.exists(DIR+'/'+fname):
-                print 'Not found:',DIR+'/'+fname
-                assert False,"Failed download. Try echo 'cacert=/etc/ssl/certs/ca-certificates.crt' > ~/.curlrc"
-            """ If this fails, try this to give curl the locations of certificates:
-            echo 'cacert=/etc/ssl/certs/ca-certificates.crt' > ~/.curlrc
-            """
-            print 'Downloaded: ',fname,'\n'
+        if not os.path.exists(DIR+'/'+fname):
+            print 'Not found:',DIR+'/'+fname
+            assert False,"Failed download. Try echo 'cacert=/etc/ssl/certs/ca-certificates.crt' > ~/.curlrc"
+        """ If this fails, try this to give curl the locations of certificates:
+        echo 'cacert=/etc/ssl/certs/ca-certificates.crt' > ~/.curlrc
+        """
+        print 'Downloaded: ',fname,'\n'
 
 if __name__=='__main__':
     pass
