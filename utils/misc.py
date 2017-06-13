@@ -226,5 +226,25 @@ def downloadData(DIR, locations):
         """
         print 'Downloaded: ',fname,'\n'
 
+def sampleGaussian(mu,logcov):
+    return mu + np.random.randn(*mu.shape)*np.exp(0.5*logcov)
+
+def sampleBernoulli(bin_prob):
+    return np.random.binomial(1,bin_prob)
+
+def unsort_order(dataset, sorted_order):
+    if type(sorted_order) is list:
+        pass
+    else:
+        try:
+            assert sorted_order.ndim == 1,'Only 1d arrays accepted'
+        except:
+            raise ValueError('Expecting list/np.ndarray')
+    inorder_idx = np.arange(len(sorted_order))
+    sorted_idx  = np.array(sorted_order)
+    both        = np.concatenate([inorder_idx, sorted_idx],axis=1)
+    return both[np.argsort(both[:,1])][:,0]
+
+
 if __name__=='__main__':
     pass
