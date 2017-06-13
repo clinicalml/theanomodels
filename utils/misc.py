@@ -232,7 +232,7 @@ def sampleGaussian(mu,logcov):
 def sampleBernoulli(bin_prob):
     return np.random.binomial(1,bin_prob)
 
-def unsort_order(dataset, sorted_order):
+def unsort_idx(sorted_order):
     if type(sorted_order) is list:
         pass
     else:
@@ -244,7 +244,6 @@ def unsort_order(dataset, sorted_order):
     sorted_idx  = np.array(sorted_order)
     both        = np.concatenate([inorder_idx, sorted_idx],axis=1)
     return both[np.argsort(both[:,1])][:,0]
-
 
 if __name__=='__main__':
     pass
