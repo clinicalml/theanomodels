@@ -240,8 +240,8 @@ def unsort_idx(sorted_order):
             assert sorted_order.ndim == 1,'Only 1d arrays accepted'
         except:
             raise ValueError('Expecting list/np.ndarray')
-    inorder_idx = np.arange(len(sorted_order))
-    sorted_idx  = np.array(sorted_order)
+    inorder_idx = np.arange(len(sorted_order)).reshape(-1,1)
+    sorted_idx  = np.array(sorted_order).reshape(-1,1)
     both        = np.concatenate([inorder_idx, sorted_idx],axis=1)
     return both[np.argsort(both[:,1])][:,0]
 
