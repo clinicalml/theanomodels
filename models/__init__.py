@@ -618,24 +618,17 @@ class BaseModel:
     def _apply_mask(self, loss_tensor, mask_tensor):
         """
         The application of the mask depends on the loss tensor and mask_tensor
-        loss_tensor: 2/3 dimensional [1/0 either per feature or per timestep]
-        mask_tensor: 2/3 dimensional [bs x dim or bs x T x dim]
-        Return: masked_loss [bs x dim] or [bs x T x dim] where the mask is applied appropriately 
+        if loss_tensor.ndim == mask_tensor.ndim, then just multiply
+        elif loss_tensor.ndim == mask_tensor.ndim+1 then assume the last dimension of mask_tensor must be replicated
+        else: error
+        Return: masked_loss [same shape as loss_tensor]
         """
-        if loss_tensor.ndim==3:
-            if mask_tensor.ndim==3:
-                return loss_tensor*mask_tensor
-            elif mask_tensor.ndim==2:
-                return loss_tensor*mask_tensor[:,:,None] 
-            else:
-                raise ValueError('No support for other dimensionalities')
-        elif loss_tensor.ndim==2:
-            if mask_tensor.ndim==2:
-                return mask_tensor*loss_tensor
-            else:
-                raise ValueError('No support for other dimensionalities')
+        if loss_tensor.ndim==mask_tensor.ndim:
+            return loss_tensor*mask_tensor
+        elif loss_tensor.ndim==mask_tensor.ndim+1:
+            return loss_tensor*mask_tensor[...,None]
         else:
-            raise ValueError('Mask tensor must be 2/3 dimensional')
+            raise ValueError('Unsupported application of mask to loss')
 
     def _nll_mixed(self, hid, X, ftypes = None, mask = None, params = None):
         """
