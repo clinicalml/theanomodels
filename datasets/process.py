@@ -2,13 +2,87 @@
 import h5py,os,urllib,cPickle,gzip
 import numpy as np
 from synthp import params_synthetic
-from utils.misc import getPYDIR
+from utils.misc import getPYDIR, downloadData, createIfAbsent
+from struct import unpack
+import gzip
+
+
+def readData(imgfile, labelfile):
+    """
+    Credit to: https://martin-thoma.com/classify-mnist-with-pybrain/
+    """
+    # Open the images with gzip in read binary mode
+    images = gzip.open(imgfile, 'rb')
+    labels = gzip.open(labelfile, 'rb')
+    images.read(4)  # skip the magic_number
+    number_of_images = images.read(4)
+    number_of_images = unpack('>I', number_of_images)[0]
+    rows = images.read(4)
+    rows = unpack('>I', rows)[0]
+    cols = images.read(4)
+    cols = unpack('>I', cols)[0]
+    labels.read(4)  # skip the magic_number
+    N = labels.read(4)
+    N = unpack('>I', N)[0]
+    if number_of_images != N:
+        raise Exception('number of labels did not match the number of images')
+    # Get the data
+    x = np.zeros((N, rows, cols), dtype=np.float32)  
+    y = np.zeros((N, 1), dtype=np.uint8)  
+    for i in range(N):
+        if i % 1000 == 0:
+            print "i: %i" % i,
+        for row in range(rows):
+            for col in range(cols):
+                tmp_pixel = images.read(1)  # Just a single byte
+                tmp_pixel = unpack('>B', tmp_pixel)[0]
+                x[i][row][col] = tmp_pixel
+        tmp_label = labels.read(1)
+        y[i] = unpack('>B', tmp_label)[0]
+    print ' Done.'
+    x,y = x, y.ravel()
+    return x, y 
+
+
+def _processFashionMNIST():
+    pfile = getPYDIR()+'/datasets/fashion_mnist/proc-fashion_mnist.h5'
+    DIR = os.path.dirname(pfile)
+    createIfAbsent(DIR)
+    if not os.path.exists(os.path.join(DIR,'train-images-idx3-ubyte.gz')):
+        print 'Downloading data'
+        urllib.urlretrieve('http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-images-idx3-ubyte.gz',os.path.join(DIR,'train-images-idx3-ubyte.gz'))
+        urllib.urlretrieve('http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-labels-idx1-ubyte.gz',os.path.join(DIR,'train-labels-idx1-ubyte.gz'))
+        urllib.urlretrieve('http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/t10k-images-idx3-ubyte.gz',os.path.join(DIR,'t10k-images-idx3-ubyte.gz'))
+        urllib.urlretrieve('http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/t10k-labels-idx1-ubyte.gz',os.path.join(DIR,'t10k-labels-idx1-ubyte.gz'))
+    if os.path.exists(pfile):
+        print 'Found: ',pfile
+        return pfile
+    print DIR
+    X, Y= readData(os.path.join(DIR,'train-images-idx3-ubyte.gz'), os.path.join(DIR,'train-labels-idx1-ubyte.gz'))
+    np.random.seed(0)
+    idxshuf   = np.random.permutation(X.shape[0])
+    valid_idx = idxshuf[:10000]
+    train_idx = idxshuf[10000:]
+    train_x, train_y = np.clip(X[train_idx]/255., a_min=0.0, a_max=1.0), Y[train_idx]
+    valid_x, valid_y = np.clip(X[valid_idx]/255., a_min=0.0, a_max=1.0), Y[valid_idx]
+    test_x, test_y = readData(os.path.join(DIR,'t10k-images-idx3-ubyte.gz'), os.path.join(DIR,'t10k-labels-idx1-ubyte.gz'))
+    test_x = np.clip(test_x/255., a_min=0.0, a_max=1.0)
+    print 'Processing Fashion MNIST'
+    h5f   = h5py.File(pfile, mode='w')
+    h5f.create_dataset('train',data = train_x)
+    h5f.create_dataset('train_y',data = train_y)
+    h5f.create_dataset('test' ,data = test_x)
+    h5f.create_dataset('test_y' ,data = test_y)
+    h5f.create_dataset('valid',data = valid_x)
+    h5f.create_dataset('valid_y',data = valid_y)
+    h5f.close()
+    for dd in [train_x, train_y, valid_x, valid_y, test_x, test_y]:
+        print dd.shape, dd.min(), dd.max()
+    print 'Done processing Fashion MNIST....',pfile
+    return pfile
 
 def _processMNIST():
     pfile = getPYDIR()+'/datasets/mnist/proc-mnist.h5'
-    """
-        Move to processed h5 file
-    """
     DIR = os.path.dirname(pfile)
     if not os.path.exists(DIR):
         print 'Making: ',DIR
@@ -211,9 +285,10 @@ def _processSynthetic(dset):
     print 'REMEMBER TO RUN BASELINES!'
 
 if __name__=='__main__':
+    pf = _processFashionMNIST()
     _processMNIST()
     _processBinarizedMNIST()
     _processPolyphonic('jsb')
-    _processSynthetic('synthetic11')
-    _processSynthetic('synthetic14')
-    _processSynthetic('synthetic20')
+    #_processSynthetic('synthetic11')
+    #_processSynthetic('synthetic14')
+    #_processSynthetic('synthetic20')

@@ -637,7 +637,6 @@ class BaseModel:
         Shapes: hid.shape[1] =  [#binary, #real, #real]   
         
         Added support for 2D & 3D observations 
-        TODO: 
         * Add support for allowing a fixed covariance (not learned)
         * Add support for modeling multinomial (categorical) RVs
         """

@@ -11,7 +11,9 @@ def loadDataset(dataset, **kwargs):
     """
     if dataset=='binarized_mnist':
         return _binarized_mnist()
-    if dataset=='mnist':
+    elif dataset=='fashion_mnist':
+        return _mnist(fashion=True)
+    elif dataset=='mnist':
         return _mnist()
     elif dataset in ['jsb','nottingham', 'piano', 'musedata', 'jsb-sorted','nottingham-sorted', 'piano-sorted', 'musedata-sorted']:
         return _polyphonic(dataset)
@@ -98,14 +100,14 @@ def _cifar10():
     h5f.close()
     return dataset
 
-    
-
-
-def _mnist():
+def _mnist(fashion=False):
     """
     Utility function to process & load MNIST dataset
     """
-    pfile = process._processMNIST()
+    if fashion:
+        pfile = process._processFashionMNIST()
+    else:
+        pfile = process._processMNIST()
     ff = h5py.File(pfile,mode='r')
     datasets = {}
     datasets['train']     = ff['train'].value
@@ -179,5 +181,7 @@ def _synthetic(dset):
     return datasets
 
 if __name__=='__main__':
-    dset = loadDataset('cifar10')
+    #dset = loadDataset('cifar10')
+    dset = loadDataset('mnist')
+    dsetf = loadDataset('fashion_mnist')
     import ipdb;ipdb.set_trace()
